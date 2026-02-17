@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+{% block title %}{{ flag.name }} — Feature Flag Manager{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <div class="flex items-center gap-2 mb-1">
+            <a href="{% url 'dashboard_flags' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </a>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ flag.name }}</h2>
+            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full {% if flag.status == 'active' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400{% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400{% endif %}">{{ flag.status }}</span>
+        </div>
+        <p class="text-sm font-mono text-gray-500 dark:text-gray-400 ml-7">{{ flag.key }}</p>
+    </div>
+    {% if user.role != 'viewer' and flag.status == 'active' %}
+    <div class="flex items-center gap-2">
+        <form method="post" action="{% url 'dashboard_flag_toggle' flag.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="is_enabled" value="{% if flag.is_enabled %}false{% else %}true{% endif %}">
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors {% if flag.is_enabled %}bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600{% else %}bg-brand text-white hover:bg-brand-dark{% endif %}">
+                {% if flag.is_enabled %}Disable{% else %}Enable{% endif %}
+            </button>
+        </form>
+        {% if user.role == 'owner' or user.role == 'admin' %}
+        {% if not flag.kill_switch %}
+        <form method="post" action="{% url 'dashboard_flag_kill_switch' flag.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="activate">
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 transition-colors"
+                    onclick="return confirm('Activate kill switch? This will immediately disable the flag.')">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                Kill Switch
+            </button>
+        </form>
+        {% else %}
+        <form method="post" action="{% url 'dashboard_flag_kill_switch' flag.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="deactivate">
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 transition-colors">
+                Deactivate Kill Switch
+            </button>
+        </form>
+        {% endif %}
+        <form method="post" action="{% url 'dashboard_flag_archive' flag.id %}">
+            {% csrf_token %}
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+                    onclick="return confirm('Archive this flag? It will be disabled and cannot be re-enabled.')">
+                Archive
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{% if error %}
+<div class="mb-4 px-4 py-3 rounded-lg bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800 text-sm">{{ error }}</div>
+{% endif %}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column: Info + Variants + Targeting -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Basic Info Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Flag Details</h3>
+            </div>
+            <div class="p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Type</span>
+                    <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white capitalize">{{ flag.flag_type }}</p>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Risk Level</span>
+                    <p class="mt-1"><span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full {% if flag.risk_level == 'critical' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400{% elif flag.risk_level == 'high' %}bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400{% elif flag.risk_level == 'medium' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400{% else %}bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400{% endif %}">{{ flag.risk_level }}</span></p>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Version</span>
+                    <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white">v{{ flag.version }}</p>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Environment</span>
+                    <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white capitalize">{{ flag.environment.name }}</p>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Activate At</span>
+                    <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ flag.activate_at|default:"—" }}</p>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Expire At</span>
+                    <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ flag.expire_at|default:"—" }}</p>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Depends On</span>
+                    <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{% if flag.depends_on %}<a href="{% url 'dashboard_flag_detail' flag.depends_on.id %}" class="text-brand hover:underline">{{ flag.depends_on.key }}</a>{% else %}—{% endif %}</p>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Created By</span>
+                    <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ flag.created_by.email|default:"—" }}</p>
+                </div>
+            </div>
+            {% if flag.description %}
+            <div class="px-5 pb-5">
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Description</span>
+                <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ flag.description }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Variants Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Variants</h3>
+                {% if user.role != 'viewer' and flag.status == 'active' and flag.flag_type != 'boolean' %}
+                <button onclick="document.getElementById('variant-editor').classList.toggle('hidden')" class="text-xs text-brand hover:text-brand-dark font-medium">Edit Variants</button>
+                {% endif %}
+            </div>
+            <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                {% for variant in flag.variants.all %}
+                <div class="px-5 py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ variant.name }}</span>
+                        {% if variant.is_control %}<span class="px-1.5 py-0.5 text-xs font-medium rounded bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">Control</span>{% endif %}
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm text-gray-500 dark:text-gray-400 font-mono">{{ variant.value }}</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-brand rounded-full" style="width: {{ variant.rollout_percentage }}%"></div>
+                            </div>
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white w-12 text-right">{{ variant.rollout_percentage }}%</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="px-5 py-6 text-center text-sm text-gray-400">No variants configured</div>
+                {% endfor %}
+            </div>
+
+            <!-- Variant Editor (hidden by default) -->
+            {% if user.role != 'viewer' and flag.status == 'active' and flag.flag_type != 'boolean' %}
+            <div id="variant-editor" class="hidden border-t border-gray-200 dark:border-gray-700 p-5" x-data="variantEditor()">
+                <form method="post" action="{% url 'dashboard_flag_variants' flag.id %}" @submit="return validateVariants($event)">
+                    {% csrf_token %}
+                    <div class="space-y-3 mb-4">
+                        <template x-for="(v, i) in variants" :key="i">
+                            <div class="flex items-center gap-3">
+                                <input type="text" :name="'variants-'+i+'-name'" x-model="v.name" placeholder="Name" required class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand">
+                                <input type="text" :name="'variants-'+i+'-value'" x-model="v.value" placeholder="Value" required class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand">
+                                <input type="number" :name="'variants-'+i+'-percentage'" x-model.number="v.percentage" min="0" max="100" step="0.01" required class="w-24 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand" placeholder="%">
+                                <label class="flex items-center gap-1 text-xs text-gray-500"><input type="checkbox" :name="'variants-'+i+'-is_control'" x-model="v.is_control" class="rounded border-gray-300 text-brand focus:ring-brand"> Ctrl</label>
+                                <button type="button" @click="variants.splice(i, 1)" class="p-1 text-red-400 hover:text-red-600"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <button type="button" @click="variants.push({name:'',value:'',percentage:0,is_control:false})" class="text-sm text-brand hover:text-brand-dark font-medium">+ Add Variant</button>
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm" :class="totalPct === 100 ? 'text-emerald-600' : 'text-red-600'">Total: <span x-text="totalPct.toFixed(2)"></span>%</span>
+                            <button type="submit" :disabled="totalPct !== 100" class="px-4 py-2 text-sm font-medium rounded-lg bg-brand text-white hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Save Variants</button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="variant_count" x-bind:value="variants.length">
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Targeting Rules Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Targeting Rules</h3>
+                {% if user.role != 'viewer' and flag.status == 'active' %}
+                <button onclick="document.getElementById('rule-builder').classList.toggle('hidden')" class="text-xs text-brand hover:text-brand-dark font-medium">+ Add Rule</button>
+                {% endif %}
+            </div>
+            <div id="targeting-rules-list" class="divide-y divide-gray-100 dark:divide-gray-700">
+                {% for rule in targeting_rules %}
+                <div class="px-5 py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500 dark:text-gray-400">{{ rule.priority }}</span>
+                        <div>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white capitalize">{{ rule.rule_type|cut:"_" }}</span>
+                            {% if rule.attribute_key %}<span class="text-xs text-gray-400">({{ rule.attribute_key }})</span>{% endif %}
+                            <span class="text-sm text-gray-500 dark:text-gray-400 mx-1">{{ rule.operator }}</span>
+                            <span class="text-sm font-mono text-gray-700 dark:text-gray-300">{{ rule.value }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs {% if rule.is_active %}text-emerald-600{% else %}text-gray-400{% endif %}">{% if rule.is_active %}Active{% else %}Inactive{% endif %}</span>
+                        {% if user.role != 'viewer' %}
+                        <form method="post" action="{% url 'dashboard_rule_delete' rule.id %}" class="inline"
+                              hx-post="{% url 'dashboard_rule_delete' rule.id %}"
+                              hx-target="#targeting-rules-list"
+                              hx-swap="innerHTML"
+                              hx-confirm="Delete this targeting rule?">
+                            {% csrf_token %}
+                            <button type="submit" class="p-1 text-red-400 hover:text-red-600"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="px-5 py-6 text-center text-sm text-gray-400">No targeting rules configured</div>
+                {% endfor %}
+            </div>
+
+            <!-- Rule Builder (hidden by default) -->
+            {% if user.role != 'viewer' and flag.status == 'active' %}
+            <div id="rule-builder" class="hidden border-t border-gray-200 dark:border-gray-700 p-5">
+                <form method="post" action="{% url 'dashboard_rule_create' flag.id %}"
+                      hx-post="{% url 'dashboard_rule_create' flag.id %}"
+                      hx-target="#targeting-rules-list"
+                      hx-swap="innerHTML">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Rule Type</label>
+                            <select name="rule_type" required class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand">
+                                <option value="user_id">User ID</option>
+                                <option value="email">Email</option>
+                                <option value="role">Role</option>
+                                <option value="country">Country</option>
+                                <option value="custom_attribute">Custom Attribute</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Operator</label>
+                            <select name="operator" required class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand">
+                                <option value="equals">Equals</option>
+                                <option value="not_equals">Not Equals</option>
+                                <option value="contains">Contains</option>
+                                <option value="not_contains">Not Contains</option>
+                                <option value="in_list">In List</option>
+                                <option value="not_in_list">Not In List</option>
+                                <option value="starts_with">Starts With</option>
+                                <option value="ends_with">Ends With</option>
+                                <option value="regex">Regex</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Value</label>
+                            <input type="text" name="value" required placeholder="Value" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Attr Key</label>
+                            <input type="text" name="attribute_key" placeholder="For custom attr" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Priority</label>
+                            <input type="number" name="priority" value="0" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand">
+                        </div>
+                    </div>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">Add Rule</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Status + Approval + Audit -->
+    <div class="space-y-6">
+        <!-- Status Indicators -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Status</h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Enabled</span>
+                    <span class="inline-flex items-center gap-1 text-sm font-medium {% if flag.is_enabled %}text-emerald-600{% else %}text-gray-500{% endif %}">
+                        {% if flag.is_enabled %}<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Yes{% else %}No{% endif %}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Kill Switch</span>
+                    <span class="text-sm font-medium {% if flag.kill_switch %}text-red-600{% else %}text-gray-500{% endif %}">{% if flag.kill_switch %}Active{% else %}Inactive{% endif %}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Requires Approval</span>
+                    <span class="text-sm font-medium">{% if flag.requires_approval %}Yes{% else %}No{% endif %}</span>
+                </div>
+                {% if flag.requires_approval %}
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Approved</span>
+                    <span class="text-sm font-medium {% if flag.is_approved %}text-emerald-600{% else %}text-amber-600{% endif %}">{% if flag.is_approved %}Yes{% else %}Pending{% endif %}</span>
+                </div>
+                {% endif %}
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Last Evaluated</span>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">{% if flag.last_evaluated_at %}{{ flag.last_evaluated_at|timesince }} ago{% else %}Never{% endif %}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Created</span>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ flag.created_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Approval (if needed) -->
+        {% if flag.requires_approval and not flag.is_approved and user.role != 'viewer' %}
+        <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800 p-5">
+            <h3 class="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2">Approval Required</h3>
+            <p class="text-xs text-amber-700 dark:text-amber-400 mb-3">This flag requires admin approval before it can be enabled in production.</p>
+            <form method="post" action="{% url 'dashboard_request_approval' flag.id %}">
+                {% csrf_token %}
+                <textarea name="change_description" required placeholder="Describe the change..." rows="2" class="w-full px-3 py-2 text-sm border border-amber-300 dark:border-amber-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 mb-2"></textarea>
+                <button type="submit" class="w-full px-4 py-2 text-sm font-medium rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors">Request Approval</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Audit History -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Audit History</h3>
+            </div>
+            <div class="divide-y divide-gray-100 dark:divide-gray-700 max-h-80 overflow-y-auto">
+                {% for log in audit_logs %}
+                <div class="px-5 py-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-900 dark:text-white capitalize">{{ log.action }}</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ log.timestamp|timesince }} ago</span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ log.actor.email|default:"System" }}</p>
+                </div>
+                {% empty %}
+                <div class="px-5 py-6 text-center text-sm text-gray-400">No audit history</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function variantEditor() {
+    return {
+        variants: [
+            {% for v in flag.variants.all %}
+            { name: '{{ v.name }}', value: '{{ v.value }}', percentage: {{ v.rollout_percentage }}, is_control: {{ v.is_control|yesno:"true,false" }} },
+            {% endfor %}
+        ],
+        get totalPct() {
+            return this.variants.reduce((s, v) => s + (parseFloat(v.percentage) || 0), 0);
+        },
+        validateVariants(e) {
+            if (Math.abs(this.totalPct - 100) > 0.01) {
+                alert('Variant percentages must sum to exactly 100%. Current: ' + this.totalPct.toFixed(2) + '%');
+                e.preventDefault();
+                return false;
+            }
+            return true;
+        }
+    }
+}
+</script>
+{% endblock %}
+{% endblock %}

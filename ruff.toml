@@ -1,0 +1,11 @@
+[lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM"]
+ignore = ["E501"]
+
+[lint.per-file-ignores]
+"config/settings/*.py" = ["F401", "F403", "F405"]
+"conftest.py" = ["F401"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

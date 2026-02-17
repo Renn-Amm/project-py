@@ -1,0 +1,61 @@
+{% load static %}
+<aside class="fixed inset-y-0 left-0 z-30 bg-sidebar text-white flex flex-col transition-all duration-200"
+       :class="sidebarOpen ? 'w-64' : 'w-16'">
+
+    <!-- Logo -->
+    <div class="flex items-center h-16 px-4 border-b border-white/10 shrink-0">
+        <svg class="w-8 h-8 text-brand-light shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>
+        </svg>
+        <span class="ml-3 text-lg font-bold tracking-tight whitespace-nowrap" x-show="sidebarOpen" x-cloak>FlagManager</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 py-4 space-y-1 overflow-y-auto px-2">
+        <a href="{% url 'dashboard_home' %}"
+           class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                  {% if request.resolver_match.url_name == 'dashboard_home' %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4"/></svg>
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Dashboard</span>
+        </a>
+
+        <a href="{% url 'dashboard_flags' %}"
+           class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                  {% if 'flags' in request.resolver_match.url_name %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Feature Flags</span>
+        </a>
+
+        {% if user.role == 'owner' or user.role == 'admin' %}
+        <a href="{% url 'dashboard_approvals' %}"
+           class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                  {% if request.resolver_match.url_name == 'dashboard_approvals' %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Approvals</span>
+            {% if pending_approval_count %}<span class="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" x-show="sidebarOpen" x-cloak>{{ pending_approval_count }}</span>{% endif %}
+        </a>
+
+        <a href="{% url 'dashboard_audit' %}"
+           class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                  {% if request.resolver_match.url_name == 'dashboard_audit' %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Audit Logs</span>
+        </a>
+        {% endif %}
+
+        <a href="{% url 'dashboard_analytics' %}"
+           class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                  {% if request.resolver_match.url_name == 'dashboard_analytics' %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Analytics</span>
+        </a>
+    </nav>
+
+    <!-- Collapse toggle -->
+    <div class="border-t border-white/10 p-3 shrink-0">
+        <button @click="sidebarOpen = !sidebarOpen" class="flex items-center w-full px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-sidebar-hover transition-colors text-sm">
+            <svg class="w-5 h-5 shrink-0 transition-transform" :class="sidebarOpen ? '' : 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Collapse</span>
+        </button>
+    </div>
+</aside>

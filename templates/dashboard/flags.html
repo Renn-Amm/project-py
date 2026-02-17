@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Feature Flags — Feature Flag Manager{% endblock %}
+
+{% block content %}
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Feature Flags</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ flags|length }} flag{{ flags|length|pluralize }} found</p>
+    </div>
+    {% if user.role != 'viewer' %}
+    <a href="{% url 'dashboard_flag_create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand hover:bg-brand-dark text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        New Flag
+    </a>
+    {% endif %}
+</div>
+
+<!-- Filters -->
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
+    <form method="get" class="flex flex-wrap items-end gap-3">
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Search</label>
+            <input type="text" name="search" value="{{ request.GET.search|default:'' }}" placeholder="Search by key or name..."
+                   class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand focus:border-brand">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Environment</label>
+            <select name="environment" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand">
+                <option value="">All</option>
+                {% for env in environments %}
+                <option value="{{ env.name }}" {% if selected_environment == env.name %}selected{% endif %}>{{ env.get_name_display }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label>
+            <select name="status" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand">
+                <option value="">All</option>
+                <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                <option value="archived" {% if request.GET.status == 'archived' %}selected{% endif %}>Archived</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Risk Level</label>
+            <select name="risk_level" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand">
+                <option value="">All</option>
+                <option value="low" {% if request.GET.risk_level == 'low' %}selected{% endif %}>Low</option>
+                <option value="medium" {% if request.GET.risk_level == 'medium' %}selected{% endif %}>Medium</option>
+                <option value="high" {% if request.GET.risk_level == 'high' %}selected{% endif %}>High</option>
+                <option value="critical" {% if request.GET.risk_level == 'critical' %}selected{% endif %}>Critical</option>
+            </select>
+        </div>
+        <button type="submit" class="px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            Filter
+        </button>
+        {% if request.GET.search or request.GET.environment or request.GET.status or request.GET.risk_level %}
+        <a href="{% url 'dashboard_flags' %}" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Flags Table -->
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Flag</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Environment</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Risk</th>
+                    <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Enabled</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Indicators</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                {% for flag in flags %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer" onclick="window.location='{% url 'dashboard_flag_detail' flag.id %}'">
+                    <td class="px-5 py-4">
+                        <div class="flex flex-col">
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ flag.name }}</span>
+                            <span class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ flag.key }}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-4">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full {% if flag.environment.name == 'production' %}bg-red-500{% elif flag.environment.name == 'staging' %}bg-amber-500{% else %}bg-emerald-500{% endif %}"></span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300 capitalize">{{ flag.environment.name }}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-4">
+                        <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">{{ flag.flag_type }}</span>
+                    </td>
+                    <td class="px-5 py-4">
+                        <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full
+                            {% if flag.risk_level == 'critical' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                            {% elif flag.risk_level == 'high' %}bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400
+                            {% elif flag.risk_level == 'medium' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                            {% else %}bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400{% endif %}">
+                            {{ flag.risk_level }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-4 text-center">
+                        <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full
+                            {% if flag.status == 'active' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400
+                            {% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400{% endif %}">
+                            {{ flag.status }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-4 text-center" onclick="event.stopPropagation()">
+                        {% if user.role != 'viewer' and flag.status == 'active' %}
+                        <form method="post" action="{% url 'dashboard_flag_toggle' flag.id %}" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="is_enabled" value="{% if flag.is_enabled %}false{% else %}true{% endif %}">
+                            <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:ring-2 focus:ring-brand focus:ring-offset-2 {% if flag.is_enabled %}bg-brand{% else %}bg-gray-300 dark:bg-gray-600{% endif %}">
+                                <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {% if flag.is_enabled %}translate-x-6{% else %}translate-x-1{% endif %}"></span>
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="inline-flex h-6 w-11 items-center rounded-full {% if flag.is_enabled %}bg-brand/50{% else %}bg-gray-200 dark:bg-gray-700{% endif %}">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white/70 shadow {% if flag.is_enabled %}translate-x-6{% else %}translate-x-1{% endif %}"></span>
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-5 py-4">
+                        <div class="flex items-center gap-1.5">
+                            {% if flag.kill_switch %}
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium rounded bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" title="Kill switch active">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                Kill
+                            </span>
+                            {% endif %}
+                            {% if flag.is_stale %}
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" title="Stale flag">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Stale
+                            </span>
+                            {% endif %}
+                            {% if flag.requires_approval and not flag.is_approved %}
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" title="Pending approval">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                Approval
+                            </span>
+                            {% endif %}
+                            {% if flag.is_expired %}
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400" title="Expired">Expired</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-5 py-12 text-center">
+                        <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">No feature flags found</p>
+                        {% if user.role != 'viewer' %}
+                        <a href="{% url 'dashboard_flag_create' %}" class="inline-flex items-center gap-1 mt-2 text-sm text-brand hover:text-brand-dark font-medium">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Create your first flag
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  DJANGO_ENV: test
+  DJANGO_SETTINGS_MODULE: config.settings
+  SECRET_KEY: ci-test-secret-key
+  DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_featureflags
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test_featureflags
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r requirements/dev.txt
+
+      - name: Run linting
+        run: ruff check apps/ config/ tests/
+
+      - name: Run type checking
+        run: mypy apps config
+
+      - name: Check missing migrations
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Run migrations
+        run: python manage.py migrate --run-syncdb
+
+      - name: Run tests with coverage
+        run: |
+          pytest \
+            --cov=apps \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-fail-under=80 \
+            --tb=short \
+            -v
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  security:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements/dev.txt
+
+      - name: Run pip-audit (dependency vulnerability scan)
+        run: pip-audit --strict --desc
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t featureflag-manager:${{ github.sha }} .
+
+      - name: Verify Docker image runs
+        run: |
+          docker run --rm -d \
+            --name ff-test \
+            -e SECRET_KEY=ci-docker-test \
+            -e DJANGO_ENV=production \
+            -e DATABASE_URL=sqlite:///tmp/test.db \
+            -p 8000:8000 \
+            featureflag-manager:${{ github.sha }} \
+            python -c "print('Container starts successfully')"

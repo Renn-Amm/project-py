@@ -1,0 +1,28 @@
+{% for rule in targeting_rules %}
+<div class="px-5 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+        <span class="w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500 dark:text-gray-400">{{ rule.priority }}</span>
+        <div>
+            <span class="text-sm font-medium text-gray-900 dark:text-white capitalize">{{ rule.rule_type|cut:"_" }}</span>
+            {% if rule.attribute_key %}<span class="text-xs text-gray-400">({{ rule.attribute_key }})</span>{% endif %}
+            <span class="text-sm text-gray-500 dark:text-gray-400 mx-1">{{ rule.operator }}</span>
+            <span class="text-sm font-mono text-gray-700 dark:text-gray-300">{{ rule.value }}</span>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        <span class="text-xs {% if rule.is_active %}text-emerald-600{% else %}text-gray-400{% endif %}">{% if rule.is_active %}Active{% else %}Inactive{% endif %}</span>
+        {% if user.role != 'viewer' %}
+        <form method="post" action="{% url 'dashboard_rule_delete' rule.pk %}" class="inline"
+              hx-post="{% url 'dashboard_rule_delete' rule.pk %}"
+              hx-target="#targeting-rules-list"
+              hx-swap="innerHTML"
+              hx-confirm="Delete this targeting rule?">
+            {% csrf_token %}
+            <button type="submit" class="p-1 text-red-400 hover:text-red-600"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+<div class="px-5 py-6 text-center text-sm text-gray-400">No targeting rules configured</div>
+{% endfor %}
