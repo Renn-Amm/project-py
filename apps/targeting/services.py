@@ -86,8 +86,9 @@ class TargetingService:
 
         elif operator == Operator.REGEX:
             try:
-                return bool(re.match(rule_str, actual_str, flags=re.DOTALL, timeout=1))
-            except (re.error, TimeoutError):
+                pattern = re.compile(rule_str, flags=re.DOTALL)
+                return bool(pattern.match(actual_str))
+            except re.error:
                 return False
 
         return False

@@ -35,14 +35,20 @@ class TenantMiddleware(MiddlewareMixin):
         if any(request.path.startswith(p) for p in self.EXEMPT_PATHS):
             return None
 
-        if hasattr(request, "user") and request.user.is_authenticated:
-            tenant = getattr(request.user, "tenant", None)
+        user = None
+        if hasattr(request, "user") and getattr(request.user, "is_authenticated", False):
+            user = request.user
+        elif getattr(request, "_force_auth_user", None) is not None:
+            user = request._force_auth_user
+
+        if user is not None and getattr(user, "is_authenticated", False):
+            tenant = getattr(user, "tenant", None)
             if tenant is None and any(
                 request.path.startswith(p) for p in self.TENANT_REQUIRED_PATHS
             ):
                 logger.warning(
                     "Tenant-required request from user without tenant: %s %s",
-                    request.user.email,
+                    getattr(user, "email", "unknown"),
                     request.path,
                 )
                 return JsonResponse(

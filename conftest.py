@@ -91,24 +91,36 @@ def api_client():
 
 
 @pytest.fixture
-def authenticated_client(api_client, owner_user):
-    api_client.force_authenticate(user=owner_user)
-    return api_client
+def authenticated_client(owner_user):
+    from rest_framework.test import APIClient
+
+    client = APIClient()
+    client.force_authenticate(user=owner_user)
+    return client
 
 
 @pytest.fixture
-def developer_client(api_client, developer_user):
-    api_client.force_authenticate(user=developer_user)
-    return api_client
+def developer_client(developer_user):
+    from rest_framework.test import APIClient
+
+    client = APIClient()
+    client.force_authenticate(user=developer_user)
+    return client
 
 
 @pytest.fixture
-def viewer_client(api_client, viewer_user):
-    api_client.force_authenticate(user=viewer_user)
-    return api_client
+def viewer_client(viewer_user):
+    from rest_framework.test import APIClient
+
+    client = APIClient()
+    client.force_authenticate(user=viewer_user)
+    return client
 
 
 @pytest.fixture
-def other_tenant_client(api_client, other_tenant_user):
-    api_client.force_authenticate(user=other_tenant_user)
-    return api_client
+def other_tenant_client(other_tenant_user):
+    from rest_framework.test import APIClient
+
+    client = APIClient()
+    client.force_authenticate(user=other_tenant_user)
+    return client

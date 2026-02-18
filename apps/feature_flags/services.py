@@ -66,80 +66,85 @@ class FeatureFlagService:
     @transaction.atomic
     def update_flag(flag, user, **updates):
         # Re-fetch with row lock to prevent concurrent modification
-        flag = FeatureFlag.objects.select_for_update().get(pk=flag.pk)
+        db_flag = FeatureFlag.objects.select_for_update().get(pk=flag.pk)
 
-        if flag.status == FlagStatus.ARCHIVED:
+        if db_flag.status == FlagStatus.ARCHIVED:
             raise ValidationError("Cannot modify an archived flag.")
 
-        if flag.is_production and flag.requires_approval and not flag.is_approved:
+        if db_flag.is_production and db_flag.requires_approval and not db_flag.is_approved:
             raise ValidationError(
                 "Production flag requires approval before modification."
             )
 
         # Enforce key immutability
-        if "key" in updates and updates["key"] != flag.key:
+        if "key" in updates and updates["key"] != db_flag.key:
             raise ValidationError("Cannot change 'key' after creation.")
 
         # Only allow whitelisted fields to prevent mass-assignment attacks
         for field, value in updates.items():
             if field in UPDATABLE_FLAG_FIELDS:
-                setattr(flag, field, value)
+                setattr(db_flag, field, value)
 
-        flag.version += 1
-        flag.save()
+        db_flag.version += 1
+        db_flag.save()
+        flag.refresh_from_db()
         return flag
 
     @staticmethod
     @transaction.atomic
     def archive_flag(flag):
-        flag = FeatureFlag.objects.select_for_update().get(pk=flag.pk)
-        if flag.dependents.filter(status=FlagStatus.ACTIVE).exists():
+        db_flag = FeatureFlag.objects.select_for_update().get(pk=flag.pk)
+        if db_flag.dependents.filter(status=FlagStatus.ACTIVE).exists():
             raise ValidationError(
                 "Cannot archive flag with active dependents."
             )
-        flag.status = FlagStatus.ARCHIVED
-        flag.is_enabled = False
-        flag.save()
+        db_flag.status = FlagStatus.ARCHIVED
+        db_flag.is_enabled = False
+        db_flag.save()
+        flag.refresh_from_db()
         return flag
 
     @staticmethod
     @transaction.atomic
     def toggle_flag(flag, enabled, user):
-        flag = FeatureFlag.objects.select_for_update().get(pk=flag.pk)
+        db_flag = FeatureFlag.objects.select_for_update().get(pk=flag.pk)
 
-        if flag.status == FlagStatus.ARCHIVED:
+        if db_flag.status == FlagStatus.ARCHIVED:
             raise ValidationError("Cannot toggle an archived flag.")
 
-        if flag.kill_switch and enabled:
+        if db_flag.kill_switch and enabled:
             raise ValidationError("Kill switch is active. Cannot enable flag.")
 
-        if enabled and flag.is_production and flag.requires_approval and not flag.is_approved:
+        if enabled and db_flag.is_production and db_flag.requires_approval and not db_flag.is_approved:
             raise ValidationError(
                 "Production flag requires approval before enabling."
             )
 
-        flag.is_enabled = enabled
-        flag.version += 1
-        flag.save()
+        db_flag.is_enabled = enabled
+        db_flag.version += 1
+        db_flag.save()
+        flag.refresh_from_db()
         return flag
 
     @staticmethod
     @transaction.atomic
     def activate_kill_switch(flag):
-        flag = FeatureFlag.objects.select_for_update().get(pk=flag.pk)
-        flag.kill_switch = True
-        flag.is_enabled = False
-        flag.version += 1
-        flag.save()
+        db_flag = FeatureFlag.objects.select_for_update().get(pk=flag.pk)
+        db_flag.kill_switch = True
+        db_flag.is_enabled = False
+        db_flag.version += 1
+        db_flag.save()
+        flag.refresh_from_db()
         return flag
 
     @staticmethod
     @transaction.atomic
     def deactivate_kill_switch(flag):
-        flag = FeatureFlag.objects.select_for_update().get(pk=flag.pk)
-        flag.kill_switch = False
-        flag.version += 1
-        flag.save()
+        db_flag = FeatureFlag.objects.select_for_update().get(pk=flag.pk)
+        db_flag.kill_switch = False
+        db_flag.version += 1
+        db_flag.save()
+        flag.refresh_from_db()
         return flag
 
     @staticmethod

@@ -1,0 +1,12 @@
+[run]
+branch = True
+source =
+    apps
+
+[report]
+show_missing = True
+skip_covered = False
+
+omit =
+    apps/dashboard/*
+    apps/tenants/querysets.py

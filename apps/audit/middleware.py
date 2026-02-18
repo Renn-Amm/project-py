@@ -1,6 +1,7 @@
 import json
 import logging
 
+from django.http import RawPostDataException
 from django.utils.deprecation import MiddlewareMixin
 
 from apps.audit.services import AuditService
@@ -114,8 +115,13 @@ class AuditMiddleware(MiddlewareMixin):
 
     def _safe_get_body(self, request):
         try:
-            if request.body:
-                data = json.loads(request.body)
+            try:
+                body = request.body
+            except RawPostDataException:
+                return {}
+
+            if body:
+                data = json.loads(body)
                 sensitive_keys = {"password", "token", "secret"}
                 return {
                     k: "***" if k in sensitive_keys else v
