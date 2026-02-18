@@ -4,7 +4,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts.permissions import IsAdminOrAbove, IsDeveloperOrAbove, RoleBasedPermission
+from apps.accounts.permissions import (
+    IsAdminOrAbove,
+    IsDeveloperOrAbove,
+    RoleBasedPermission,
+)
 from apps.feature_flags.models import FeatureFlag
 from apps.feature_flags.serializers import (
     FeatureFlagCreateSerializer,

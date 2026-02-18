@@ -5,7 +5,6 @@ from apps.feature_flags.models import FlagType
 from apps.feature_flags.services import FeatureFlagService, FlagVariantService
 from apps.targeting.models import Operator, RuleType, TargetingRule
 
-
 # ============================================================
 # Integration Tests: Evaluation Endpoint
 # ============================================================

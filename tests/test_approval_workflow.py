@@ -6,7 +6,6 @@ from apps.feature_flags.services import FeatureFlagService
 from apps.policies.models import ApprovalStatus
 from apps.policies.services import ApprovalService
 
-
 # ============================================================
 # Integration Tests: Approval Workflow
 # ============================================================
