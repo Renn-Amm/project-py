@@ -18,34 +18,44 @@ class PolicyEngine:
             for p in Policy.objects.filter(tenant=tenant)
         }
 
-        if flag.status == FlagStatus.ARCHIVED:
-            if policies.get(Policy.PolicyType.ARCHIVED_IMMUTABLE, True):
-                raise ValidationError("Policy violation: Archived flags cannot be edited.")
+        if (
+            flag.status == FlagStatus.ARCHIVED
+            and policies.get(Policy.PolicyType.ARCHIVED_IMMUTABLE, True)
+        ):
+            raise ValidationError("Policy violation: Archived flags cannot be edited.")
 
-        if flag.environment.is_production:
-            if policies.get(Policy.PolicyType.PRODUCTION_OWNER_ONLY, False):
-                if user.role != UserRole.OWNER:
-                    raise ValidationError(
-                        "Policy violation: Only Owner can modify production flags."
-                    )
+        if (
+            flag.environment.is_production
+            and policies.get(Policy.PolicyType.PRODUCTION_OWNER_ONLY, False)
+            and user.role != UserRole.OWNER
+        ):
+            raise ValidationError(
+                "Policy violation: Only Owner can modify production flags."
+            )
 
-            if policies.get(Policy.PolicyType.PRODUCTION_APPROVAL, True):
-                if flag.requires_approval and not flag.is_approved:
-                    pending = ApprovalRequest.objects.filter(
-                        flag=flag, status=ApprovalStatus.PENDING
-                    ).exists()
-                    if not pending:
-                        raise ValidationError(
-                            "Policy violation: Production flag requires an approval request."
-                        )
+        if (
+            flag.environment.is_production
+            and policies.get(Policy.PolicyType.PRODUCTION_APPROVAL, True)
+            and flag.requires_approval
+            and not flag.is_approved
+        ):
+            pending = ApprovalRequest.objects.filter(
+                flag=flag, status=ApprovalStatus.PENDING
+            ).exists()
+            if not pending:
+                raise ValidationError(
+                    "Policy violation: Production flag requires an approval request."
+                )
 
-        if flag.risk_level in (RiskLevel.HIGH, RiskLevel.CRITICAL):
-            if flag.environment.is_production:
-                if policies.get(Policy.PolicyType.HIGH_RISK_DUAL_APPROVAL, True):
-                    if not flag.is_approved:
-                        raise ValidationError(
-                            "Policy violation: High/critical risk production flags require approval."
-                        )
+        if (
+            flag.risk_level in (RiskLevel.HIGH, RiskLevel.CRITICAL)
+            and flag.environment.is_production
+            and policies.get(Policy.PolicyType.HIGH_RISK_DUAL_APPROVAL, True)
+            and not flag.is_approved
+        ):
+            raise ValidationError(
+                "Policy violation: High/critical risk production flags require approval."
+            )
 
     @staticmethod
     def check_key_immutability(flag, new_key):

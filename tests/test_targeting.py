@@ -1,8 +1,8 @@
 import pytest
 
+from apps.feature_flags.services import FeatureFlagService
 from apps.targeting.models import Operator, RuleType, TargetingRule
 from apps.targeting.services import TargetingService
-from apps.feature_flags.services import FeatureFlagService
 
 
 # ============================================================

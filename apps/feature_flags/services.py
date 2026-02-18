@@ -220,11 +220,13 @@ class FlagVariantService:
         total = flag.variants.aggregate(
             total=models.Sum("rollout_percentage")
         )["total"] or Decimal("0")
-        if flag.flag_type in (FlagType.MULTIVARIATE, FlagType.EXPERIMENT):
-            if total != Decimal("100"):
-                raise ValidationError(
-                    f"Variant percentages must sum to 100. Current sum: {total}"
-                )
+        if (
+            flag.flag_type in (FlagType.MULTIVARIATE, FlagType.EXPERIMENT)
+            and total != Decimal("100")
+        ):
+            raise ValidationError(
+                f"Variant percentages must sum to 100. Current sum: {total}"
+            )
         return True
 
 

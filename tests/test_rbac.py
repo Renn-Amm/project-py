@@ -1,4 +1,3 @@
-import pytest
 from rest_framework import status
 
 from apps.feature_flags.services import FeatureFlagService
@@ -173,7 +172,7 @@ class TestPrivilegeEscalation:
         assert user.tenant is None
 
     def test_cannot_change_own_role_via_profile(self, developer_client, developer_user):
-        resp = developer_client.patch(
+        developer_client.patch(
             "/api/auth/profile/",
             {"role": "owner"},
             format="json",
@@ -182,7 +181,7 @@ class TestPrivilegeEscalation:
         assert developer_user.role == "developer"
 
     def test_cannot_change_own_tenant_via_profile(self, developer_client, developer_user, tenant_b):
-        resp = developer_client.patch(
+        developer_client.patch(
             "/api/auth/profile/",
             {"tenant": tenant_b.id},
             format="json",

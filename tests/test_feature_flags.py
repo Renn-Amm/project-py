@@ -9,7 +9,6 @@ from apps.feature_flags.models import (
     FeatureFlag,
     FlagStatus,
     FlagType,
-    FlagVariant,
     RiskLevel,
 )
 from apps.feature_flags.services import (

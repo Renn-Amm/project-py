@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from apps.accounts.models import UserRole
 from apps.feature_flags.services import FeatureFlagService
-from apps.policies.models import ApprovalRequest, ApprovalStatus
+from apps.policies.models import ApprovalStatus
 from apps.policies.services import ApprovalService
 
 

@@ -6,7 +6,10 @@ from rest_framework.views import APIView
 from apps.accounts.permissions import IsDeveloperOrAbove
 from apps.feature_flags.models import FeatureFlag, FlagStatus
 from apps.targeting.models import TargetingRule
-from apps.targeting.serializers import TargetingRuleCreateSerializer, TargetingRuleSerializer
+from apps.targeting.serializers import (
+    TargetingRuleCreateSerializer,
+    TargetingRuleSerializer,
+)
 
 
 class TargetingRuleListView(generics.ListAPIView):

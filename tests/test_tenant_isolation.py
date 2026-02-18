@@ -1,9 +1,7 @@
 import pytest
 from rest_framework import status
 
-from apps.feature_flags.models import FeatureFlag
 from apps.feature_flags.services import FeatureFlagService
-from apps.tenants.models import Environment
 from apps.tenants.services import TenantService
 
 

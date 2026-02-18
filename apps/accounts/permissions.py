@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-from apps.accounts.models import UserRole, ROLE_HIERARCHY
+from apps.accounts.models import ROLE_HIERARCHY, UserRole
 
 
 class IsOwner(BasePermission):
