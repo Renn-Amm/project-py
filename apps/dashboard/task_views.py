@@ -232,6 +232,13 @@ def project_detail_view(request, pk: int):
         for key, label in TaskStatus.choices
     ]
 
+    stats = {
+        "total": tasks.count(),
+        "in_progress": len(by_status.get(TaskStatus.IN_PROGRESS, [])),
+        "completed": len(by_status.get(TaskStatus.COMPLETED, [])),
+        "overdue": tasks.filter(is_overdue=True).exclude(status=TaskStatus.COMPLETED).count(),
+    }
+
     return render(
         request,
         "dashboard/project_detail.html",
@@ -239,6 +246,7 @@ def project_detail_view(request, pk: int):
             "project": project,
             "memberships": memberships,
             "columns": columns,
+            "stats": stats,
             "statuses": TaskStatus.choices,
         },
     )

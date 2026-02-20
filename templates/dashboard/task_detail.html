@@ -32,10 +32,9 @@
                     <div>
                         <span
                             class="text-xs font-medium text-gray-400 dark:text-white/30 uppercase tracking-wider">Priority</span>
-                        <div class="mt-1 font-semibold capitalize
-                            {% if task.priority == 'critical' %}text-danger
-                            {% elif task.priority == 'high' %}text-warn
-                            {% else %}text-gray-800 dark:text-white{% endif %}">{{ task.priority }}</div>
+                        <div
+                            class="mt-1 font-semibold capitalize {% if task.priority == 'critical' %}text-danger{% elif task.priority == 'high' %}text-warn{% else %}text-gray-800 dark:text-white{% endif %}">
+                            {{ task.priority }}</div>
                     </div>
                     <div>
                         <span
