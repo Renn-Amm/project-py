@@ -2,7 +2,10 @@ from datetime import timedelta
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.test import RequestFactory
 from django.utils import timezone
+from django.contrib.messages.storage.fallback import FallbackStorage
+from django.contrib.sessions.middleware import SessionMiddleware
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
@@ -10,7 +13,11 @@ from apps.accounts.permissions import IsAdminOrAbove
 from apps.accounts.permissions import IsDeveloperOrAbove
 from apps.accounts.permissions import IsOwner
 from apps.accounts.permissions import RoleBasedPermission
+from apps.audit.models import AuditLog
+from apps.audit.services import AuditService
 from apps.core.exception_handler import custom_exception_handler
+from apps.core.views import HealthCheckView
+from apps.core.views import signup_view
 from apps.organizations.models import Organization
 from apps.tasks.models import Task, TaskStatus
 from apps.tasks.services import TaskWorkflowService
@@ -94,3 +101,80 @@ class TestCoverageBoost:
         entry.save(update_fields=["created_at"])
         with pytest.raises(ValidationError):
             TimeEntryService.assert_entry_mutable(entry)
+
+    def test_audit_service_filters(self, owner_user):
+        org = owner_user.organization
+
+        AuditService.log(
+            actor=owner_user,
+            organization=org,
+            action="create",
+            object_type="Project",
+            object_id="1",
+            metadata={"password": "secret"},
+        )
+        AuditService.log(
+            actor=owner_user,
+            organization=org,
+            action="delete",
+            object_type="Task",
+            object_id="2",
+        )
+
+        assert AuditLog.objects.filter(organization=org).count() == 2
+        assert AuditService.get_logs_for_object("Project", "1").count() == 1
+        assert AuditService.get_logs_for_organization(org, {"action": "create"}).count() == 1
+        assert AuditService.get_logs_for_organization(org, {"object_type": "Task"}).count() == 1
+        assert AuditService.get_logs_for_organization(org, {"actor_id": owner_user.id}).count() == 2
+
+    def test_health_check_view(self, db):
+        rf = APIRequestFactory()
+        req = rf.get("/api/health/")
+        resp = HealthCheckView.as_view()(req)
+        assert resp.status_code in (200, 503)
+        assert "status" in resp.data
+        assert "checks" in resp.data
+
+    def test_signup_view_validation_and_duplicate_email(self, db):
+        rf = RequestFactory()
+
+        def _attach_messages(request):
+            middleware = SessionMiddleware(lambda r: None)
+            middleware.process_request(request)
+            request.session.save()
+            request._messages = FallbackStorage(request)
+
+        req_missing = rf.post(
+            "/signup/",
+            data={"email": "a@example.com", "password": "testpass123"},
+        )
+        req_missing.user = type("Anon", (), {"is_authenticated": False})()
+        _attach_messages(req_missing)
+        resp_missing = signup_view(req_missing)
+        assert resp_missing.status_code == 200
+
+        Organization.objects.create(name="Org")
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        User.objects.create_user(
+            email="dup@example.com",
+            password="testpass123",
+            first_name="",
+            last_name="",
+            role="owner",
+            organization=Organization.objects.create(name="Dup Org"),
+        )
+
+        req_dup = rf.post(
+            "/signup/",
+            data={
+                "email": "dup@example.com",
+                "password": "testpass123",
+                "organization_name": "X",
+            },
+        )
+        req_dup.user = type("Anon", (), {"is_authenticated": False})()
+        _attach_messages(req_dup)
+        resp_dup = signup_view(req_dup)
+        assert resp_dup.status_code == 200
