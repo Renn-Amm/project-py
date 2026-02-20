@@ -1,0 +1,18 @@
+-r prod.in
+
+pytest
+pytest-django
+pytest-cov
+factory-boy
+
+ruff
+
+mypy
+django-stubs
+djangorestframework-stubs
+
+types-redis
+
+pip-audit
+pre-commit
+pip-tools

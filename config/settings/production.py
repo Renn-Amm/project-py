@@ -1,5 +1,9 @@
 import os
 
+from typing import Any, cast
+
+import config.settings.base as base_settings
+
 from config.settings.base import *  # noqa: F401, F403
 
 DEBUG = False
@@ -55,9 +59,17 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {  # noqa: F405
 }
 
 # Production logging
-LOGGING["handlers"]["file"] = {  # noqa: F405
+logging_config: dict[str, Any] = cast(dict[str, Any], getattr(base_settings, "LOGGING", {}))
+handlers: dict[str, Any] = cast(dict[str, Any], logging_config.get("handlers", {}))
+root: dict[str, Any] = cast(dict[str, Any], logging_config.get("root", {}))
+
+handlers["file"] = {
     "class": "logging.FileHandler",
-    "filename": os.environ.get("LOG_FILE", "/var/log/featureflags/app.log"),
+    "filename": os.environ.get("LOG_FILE", "/var/log/taskmanager/app.log"),
     "formatter": "structured",  # noqa: F405
 }
-LOGGING["root"]["handlers"] = ["console", "file"]  # noqa: F405
+root["handlers"] = ["console", "file"]
+
+logging_config["handlers"] = handlers
+logging_config["root"] = root
+LOGGING = logging_config

@@ -12,6 +12,7 @@ build/
 *.egg
 .eggs/
 db.sqlite3
+*.sqlite3
 *.log
 .env
 .env.*
@@ -24,3 +25,8 @@ coverage.xml
 .ruff_cache/
 .mypy_cache/
 node_modules/
+
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

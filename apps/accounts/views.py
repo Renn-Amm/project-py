@@ -36,9 +36,9 @@ class UserListView(generics.ListAPIView):
     permission_classes = [IsAdminOrAbove]
 
     def get_queryset(self):
-        if not self.request.user.tenant:
+        if not self.request.user.organization:
             return User.objects.none()
-        return User.objects.filter(tenant=self.request.user.tenant)
+        return User.objects.filter(organization=self.request.user.organization)
 
 
 class ChangePasswordView(APIView):
@@ -60,6 +60,7 @@ class ChangePasswordView(APIView):
 
 class LogoutView(APIView):
     """Blacklists the refresh token on logout to prevent reuse."""
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):

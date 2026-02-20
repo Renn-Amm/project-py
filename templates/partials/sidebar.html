@@ -7,7 +7,7 @@
         <svg class="w-8 h-8 text-brand-light shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>
         </svg>
-        <span class="ml-3 text-lg font-bold tracking-tight whitespace-nowrap" x-show="sidebarOpen" x-cloak>FlagManager</span>
+        <span class="ml-3 text-lg font-bold tracking-tight whitespace-nowrap" x-show="sidebarOpen" x-cloak>TaskManager</span>
     </div>
 
     <!-- Navigation -->
@@ -19,35 +19,32 @@
             <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Dashboard</span>
         </a>
 
-        <a href="{% url 'dashboard_flags' %}"
+        <a href="{% url 'dashboard_projects' %}"
            class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                  {% if 'flags' in request.resolver_match.url_name %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
+                  {% if 'project' in request.resolver_match.url_name %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
-            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Feature Flags</span>
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Projects</span>
         </a>
 
-        {% if user.role == 'owner' or user.role == 'admin' %}
-        <a href="{% url 'dashboard_approvals' %}"
+        <a href="{% url 'dashboard_analytics' %}"
            class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                  {% if request.resolver_match.url_name == 'dashboard_approvals' %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
-            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Approvals</span>
-            {% if pending_approval_count %}<span class="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" x-show="sidebarOpen" x-cloak>{{ pending_approval_count }}</span>{% endif %}
+                  {% if request.resolver_match.url_name == 'dashboard_analytics' %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M7 15l3-3 4 4 6-6"/></svg>
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Analytics</span>
         </a>
 
         <a href="{% url 'dashboard_audit' %}"
            class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                   {% if request.resolver_match.url_name == 'dashboard_audit' %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
-            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Audit Logs</span>
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Audit</span>
         </a>
-        {% endif %}
 
-        <a href="{% url 'dashboard_analytics' %}"
+        <a href="{% url 'dashboard_performance' %}"
            class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                  {% if request.resolver_match.url_name == 'dashboard_analytics' %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
-            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Analytics</span>
+                  {% if request.resolver_match.url_name == 'dashboard_performance' %}bg-sidebar-active text-white{% else %}text-gray-300 hover:bg-sidebar-hover hover:text-white{% endif %}">
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3v18m-7-7h14M5 14l3-3 4 4 7-7"/></svg>
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Performance</span>
         </a>
     </nav>
 

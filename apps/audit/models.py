@@ -22,8 +22,8 @@ class AuditLog(models.Model):
         null=True,
         related_name="audit_logs",
     )
-    tenant = models.ForeignKey(
-        "tenants.Tenant",
+    organization = models.ForeignKey(
+        "organizations.Organization",
         on_delete=models.CASCADE,
         related_name="audit_logs",
         null=True,
@@ -41,7 +41,7 @@ class AuditLog(models.Model):
         db_table = "audit_auditlog"
         ordering = ["-timestamp"]
         indexes = [
-            models.Index(fields=["tenant", "-timestamp"]),
+            models.Index(fields=["organization", "-timestamp"]),
             models.Index(fields=["object_type", "object_id"]),
         ]
 

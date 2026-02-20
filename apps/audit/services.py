@@ -3,11 +3,21 @@ from apps.audit.models import AuditLog
 
 class AuditService:
     @staticmethod
-    def log(*, actor, tenant, action, object_type, object_id,
-            object_repr="", metadata=None, ip_address=None, user_agent=""):
+    def log(
+        *,
+        actor,
+        organization,
+        action,
+        object_type,
+        object_id,
+        object_repr="",
+        metadata=None,
+        ip_address=None,
+        user_agent="",
+    ):
         return AuditLog.objects.create(
             actor=actor,
-            tenant=tenant,
+            organization=organization,
             action=action,
             object_type=object_type,
             object_id=str(object_id),
@@ -18,8 +28,8 @@ class AuditService:
         )
 
     @staticmethod
-    def get_logs_for_tenant(tenant, filters=None):
-        qs = AuditLog.objects.filter(tenant=tenant)
+    def get_logs_for_organization(organization, filters=None):
+        qs = AuditLog.objects.filter(organization=organization)
         if filters:
             if "action" in filters:
                 qs = qs.filter(action=filters["action"])

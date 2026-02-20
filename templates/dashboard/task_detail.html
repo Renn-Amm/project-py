@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Task{% endblock %}
+
+{% block content %}
+<div class="flex items-start justify-between gap-4 mb-6">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ task.title }}</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Project: {{ task.project.name }}</p>
+    </div>
+    <a href="{% url 'dashboard_project_detail' pk=task.project.id %}" class="text-sm text-brand hover:text-brand-dark">Back to project</a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div><span class="text-gray-500 dark:text-gray-400">Status:</span> <span class="font-semibold">{{ task.get_status_display }}</span></div>
+                <div>
+                    <span class="text-gray-500 dark:text-gray-400">Overdue:</span>
+                    {% if task.is_overdue %}<span class="font-semibold text-red-600 dark:text-red-400">Yes</span>{% else %}<span class="font-semibold">No</span>{% endif %}
+                </div>
+                <div><span class="text-gray-500 dark:text-gray-400">Assignee:</span> <span class="font-semibold">{{ task.assignee.email|default:"—" }}</span></div>
+                <div><span class="text-gray-500 dark:text-gray-400">Reviewer:</span> <span class="font-semibold">{{ task.reviewer.email|default:"—" }}</span></div>
+            </div>
+
+            {% if task.description %}
+            <div class="mt-4 text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{{ task.description }}</div>
+            {% endif %}
+        </div>
+
+        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Change status</h3>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Rules enforced by backend</div>
+            </div>
+            <div class="p-5">
+                <form method="post" action="{% url 'dashboard_task_transition' pk=task.id %}" class="flex flex-col sm:flex-row gap-3">
+                    {% csrf_token %}
+                    <select name="to_status" class="flex-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm">
+                        {% for key, label in statuses %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">Transition</button>
+                </form>
+                <div class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                    - Backlog → In Progress: assignee only
+                    <br/>- In Review → Approved: reviewer only
+                    <br/>- Completed requires review approval
+                    <br/>- Archived requires Project Manager (Owner override)
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Time entries</h3>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Total: {{ task.total_logged_time_hours }}h</div>
+            </div>
+            <div class="p-5">
+                <form method="post" action="{% url 'dashboard_time_entry_create' task_pk=task.id %}" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {% csrf_token %}
+                    <input name="hours" placeholder="Hours (e.g. 1.5)" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm" required />
+                    <input type="date" name="date" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm" required />
+                    <button class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">Log time</button>
+                </form>
+
+                <div class="mt-5 divide-y divide-gray-100 dark:divide-gray-700">
+                    {% for e in time_entries %}
+                    <div class="py-3 flex items-center justify-between text-sm">
+                        <div class="text-gray-700 dark:text-gray-200">{{ e.user.email }}</div>
+                        <div class="text-gray-500 dark:text-gray-400">{{ e.date }}</div>
+                        <div class="font-semibold">{{ e.hours }}h</div>
+                    </div>
+                    {% empty %}
+                    <div class="py-6 text-center text-sm text-gray-500 dark:text-gray-400">No time entries yet.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+            <div class="text-sm font-semibold text-gray-900 dark:text-white">Audit trail</div>
+            <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">Use API endpoint for full history: /api/tasks/{{ task.id }}/status-changes/</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

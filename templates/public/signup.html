@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Sign up{% endblock %}
+
+{% block public_content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white">
+    <header class="sticky top-0 z-40 border-b border-white/10 bg-gray-950/70 backdrop-blur">
+        <div class="mx-auto max-w-6xl px-4">
+            <div class="flex h-16 items-center justify-between">
+                <a href="{% url 'landing' %}" class="flex items-center gap-3">
+                    <div class="h-9 w-9 rounded-xl bg-brand flex items-center justify-center shadow-lg shadow-brand/20">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="leading-tight">
+                        <div class="text-sm font-semibold tracking-tight">Team Task</div>
+                        <div class="text-xs text-white/60">Performance Management</div>
+                    </div>
+                </a>
+
+                <div class="flex items-center gap-3">
+                    <a href="/dashboard/login/" class="inline-flex items-center rounded-lg border border-white/15 px-4 py-2 text-sm font-medium text-white/90 hover:bg-white/10">
+                        Log in
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="mx-auto max-w-lg px-4 pt-14 pb-16">
+        <div class="rounded-3xl border border-white/10 bg-white/5 p-8">
+            <h1 class="text-2xl font-bold tracking-tight">Create your organization</h1>
+            <p class="mt-2 text-sm text-white/70">You’ll become the Organization Owner. You can create projects and invite teammates.</p>
+
+            {% if messages %}
+            <div class="mt-6 space-y-2">
+                {% for message in messages %}
+                <div class="rounded-xl border border-white/10 bg-gray-950/40 px-4 py-3 text-sm text-white/80">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" class="mt-6 space-y-4">
+                {% csrf_token %}
+
+                <div>
+                    <label class="text-xs font-medium text-white/70">Organization name</label>
+                    <input name="organization_name" required class="mt-1 w-full rounded-xl border border-white/10 bg-gray-950/40 px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand" placeholder="e.g. Skyline Labs" />
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="text-xs font-medium text-white/70">First name</label>
+                        <input name="first_name" class="mt-1 w-full rounded-xl border border-white/10 bg-gray-950/40 px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand" />
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-white/70">Last name</label>
+                        <input name="last_name" class="mt-1 w-full rounded-xl border border-white/10 bg-gray-950/40 px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-white/70">Email</label>
+                    <input type="email" name="email" required class="mt-1 w-full rounded-xl border border-white/10 bg-gray-950/40 px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand" placeholder="you@example.com" />
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-white/70">Password</label>
+                    <input type="password" name="password" required minlength="10" class="mt-1 w-full rounded-xl border border-white/10 bg-gray-950/40 px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand" placeholder="Minimum 10 characters" />
+                </div>
+
+                <button type="submit" class="mt-2 w-full rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-white hover:bg-brand-dark shadow-lg shadow-brand/25">
+                    Sign up and continue
+                </button>
+
+                <div class="text-center text-sm text-white/60">
+                    Already have an account?
+                    <a class="text-white hover:underline" href="/dashboard/login/">Log in</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}

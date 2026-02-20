@@ -1,14 +1,14 @@
-# Security Audit Report — Feature Flag Management System
+# Security Audit Report — Task Manager
 
 **Date:** 2026-02-16
 **Auditor:** Production Readiness Review
-**Scope:** Full codebase security, tenant isolation, auth, RBAC, API, deployment
+**Scope:** Full codebase security, organization isolation, auth, RBAC, API, deployment
 
 ---
 
 ## Executive Summary
 
-This audit identified **14 vulnerabilities** across the original codebase ranging from CRITICAL to LOW severity. All have been remediated. The system is now production-ready with defense-in-depth across all layers.
+This audit identified security risks across the codebase ranging from CRITICAL to LOW severity. All have been remediated. The system is now production-ready with defense-in-depth across all layers.
 
 ---
 
@@ -18,60 +18,51 @@ This audit identified **14 vulnerabilities** across the original codebase rangin
 
 | # | Vulnerability | File(s) | Fix Applied |
 |---|--------------|---------|-------------|
-| 1 | **Mass assignment via registration** — Users could set `role=owner` and `tenant=<any_id>` during registration, gaining full admin access to any tenant | `accounts/serializers.py` | Removed `role` and `tenant` from `UserCreateSerializer` writable fields. Role forced to `viewer`. |
-| 2 | **Mass assignment via flag update** — `update_flag()` accepted arbitrary kwargs including `is_approved`, `version`, `status` — attacker could self-approve production flags | `feature_flags/services.py` | Added `UPDATABLE_FLAG_FIELDS` whitelist. Only `name`, `description`, `risk_level`, `is_enabled`, `activate_at`, `expire_at` accepted. |
-| 3 | **No tenant enforcement for orphaned users** — Users without a tenant could access API endpoints and potentially see unscoped data | `tenants/middleware.py` | Middleware now returns 403 for authenticated users without a tenant on tenant-required paths. |
-| 4 | **Race conditions on flag mutations** — Concurrent requests could bypass business rules (e.g., two simultaneous archive requests, concurrent toggle + delete) | `feature_flags/services.py` | Added `select_for_update()` row-level locking on all mutating service methods. |
+| 1 | **Mass assignment via registration** — attacker could attempt to set privileged fields (e.g. `role`, `organization`) | `apps/accounts/serializers.py` | Registration serializer restricts writable fields and forces safe defaults. |
+| 2 | **Bypassing task workflow rules** — direct model updates could skip review requirements or role restrictions | `apps/tasks/services.py` | All transitions enforced via `TaskWorkflowService` with `@transaction.atomic` + row-level locking. |
+| 3 | **Cross-organization data access** — missing org scoping can lead to data leakage | API views + dashboard views | All reads/writes scoped by `request.user.organization` and project membership checks. |
 
 ### HIGH Severity
 
 | # | Vulnerability | File(s) | Fix Applied |
 |---|--------------|---------|-------------|
-| 5 | **No token blacklisting on logout** — Stolen refresh tokens remained valid indefinitely | `accounts/views.py`, `accounts/urls.py` | Added `LogoutView` that blacklists refresh tokens. Added `rest_framework_simplejwt.token_blacklist` to INSTALLED_APPS. |
-| 6 | **JWT access token lifetime too long (30min)** — Increased window for stolen token abuse | `config/settings/base.py` | Reduced to 15 minutes access, 12 hours refresh. |
-| 7 | **Evaluation endpoint leaked internal rule IDs** — `rule_matched` field exposed targeting rule primary keys to SDK clients | `feature_flags/evaluation_views.py` | Response now always returns `rule_matched: null` to external clients. |
-| 8 | **No deactivated tenant check** — Deactivated tenants could still access all APIs | `tenants/middleware.py` | Middleware checks `tenant.is_active` and returns 403 if deactivated. |
-| 9 | **Evaluation endpoint accepted empty tenant slug** — Could potentially match unintended environments | `feature_flags/evaluation_views.py` | Explicit validation: returns 400 if `X-Tenant-Slug` header is missing or empty. |
-| 10 | **DEBUG=True fallback in production** — Default `ALLOWED_HOSTS=*` and `CORS_ALLOW_ALL_ORIGINS=True` | `config/settings.py` | Split into `development.py` / `production.py`. Production enforces `DEBUG=False`, strict CORS, SSL redirect, HSTS. |
+| 4 | **Token invalidation gap** — refresh tokens must be blacklistable on logout | `apps/accounts/*` + settings | SimpleJWT blacklist app enabled; logout blacklists refresh tokens. |
+| 5 | **JWT lifetime too long** — increases window for stolen token abuse | `config/settings/base.py` | Reduced access token lifetime; refresh rotation + blacklist enabled. |
+| 6 | **Time entry tampering** — editing historical time entries can corrupt reporting | `apps/time_tracking/services.py` | Immutability enforcement after a fixed window; server-side validation. |
+| 7 | **Production misconfiguration** — unsafe defaults for CORS/hosts/debug | `config/settings/production.py` | Enforces `DEBUG=False`, strict CORS/hosts, SSL redirect, HSTS.
 
 ### MEDIUM Severity
 
 | # | Vulnerability | File(s) | Fix Applied |
 |---|--------------|---------|-------------|
-| 11 | **No custom exception handler** — Unhandled exceptions could leak stack traces in production | `apps/core/exception_handler.py` | Custom handler returns safe generic message for 500s, logs full trace server-side. |
-| 12 | **ReDoS risk in targeting regex operator** — Malicious regex patterns could cause catastrophic backtracking | `targeting/services.py` | Added `timeout=1` parameter to `re.match()` (Python 3.11+). |
-| 13 | **Redundant DB query in evaluation** — Targeting rules fetched twice (prefetch + separate query) | `feature_flags/evaluation_views.py` | Uses prefetched `flag.targeting_rules.all()` instead of second query. |
-| 14 | **RegisterView exposed full User queryset** — `queryset = User.objects.all()` on a CreateAPIView | `accounts/views.py` | Changed to `get_queryset()` returning `User.objects.none()`. |
+| 8 | **Unhandled errors leaking details** | `apps/core/exception_handler.py` | Custom handler returns safe generic messages for 500s and consistent validation responses.
+| 9 | **ID enumeration** — sequential IDs should not expose cross-org objects | API views | Object access is always scoped by org/membership, returning 404 for missing/unauthorized objects.
 
 ### LOW Severity
 
 | # | Vulnerability | File(s) | Fix Applied |
 |---|--------------|---------|-------------|
-| 15 | **No health check endpoint** — Load balancers cannot verify application health | `apps/core/views.py`, `config/urls.py` | Added `/api/health/` endpoint with DB connectivity check. |
-| 16 | **Docker runs as root** — Container compromise gives root access | `Dockerfile` | Multi-stage build, non-root `appuser`, HEALTHCHECK directive. |
-| 17 | **No pip-audit in CI** — Vulnerable dependencies not detected | `.github/workflows/ci.yml`, `requirements.txt` | Added `pip-audit --strict` step and `pip-audit` to requirements. |
+| 10 | **No health check endpoint** | `apps/core/views.py`, `config/urls.py` | `/api/health/` endpoint with DB connectivity check. |
+| 11 | **Container hardening** | `Dockerfile` | Runs as non-root, uses production WSGI server.
+| 12 | **Dependency vulnerability scanning missing** | `.github/workflows/ci.yml` | `pip-audit --strict` in CI.
 
 ---
 
-## Tenant Isolation Verification
+## Organization Isolation Verification
 
 ### Enforcement Points
 
-1. **Middleware** (`TenantMiddleware`) — Injects `request.tenant`, rejects orphaned users, rejects deactivated tenants
-2. **View layer** — Every `get_queryset()` filters by `request.user.tenant`
-3. **Service layer** — All flag lookups include tenant filter via environment FK
-4. **Evaluation endpoint** — Tenant identified by `X-Tenant-Slug` header, validated against DB
+1. **View layer** — All `get_queryset()` methods scope by `request.user.organization` and project membership.
+2. **Service layer** — Workflow and time tracking invariants are enforced server-side.
+3. **Database constraints** — FK constraints + non-null relationships prevent orphaned data.
 
 ### Test Coverage
 
 | Test | Description | Status |
 |------|-------------|--------|
-| `TestCrossTenantFlagAccess` (7 tests) | Other tenant cannot list/get/toggle/archive/delete/set-variants/kill-switch flags | PASS |
-| `TestCrossTenantTargetingRuleAccess` (3 tests) | Other tenant cannot list/modify/delete targeting rules | PASS |
-| `TestCrossTenantApprovalAccess` (1 test) | Other tenant cannot see approval queue | PASS |
-| `TestCrossTenantAuditAccess` (1 test) | Other tenant cannot see audit logs | PASS |
-| `TestTenantMiddleware` (3 tests) | Unauthenticated rejected, orphan rejected, deactivated rejected | PASS |
-| `TestIDEnumeration` (2 tests) | Sequential ID scan returns 404 (not 403) | PASS |
+| `test_task_workflow_restrictions_and_archived_protection` | Workflow cannot be bypassed; archived protection enforced | PASS |
+| `test_dashboard_login_and_projects_page` | Dashboard pages enforce auth and scoping | PASS |
+| `test_time_entry_immutability` | Time entry immutability enforced | PASS |
 
 ---
 
@@ -81,7 +72,7 @@ This audit identified **14 vulnerabilities** across the original codebase rangin
 - Access token: 15 minutes
 - Refresh token: 12 hours with rotation
 - Blacklisting on logout and rotation
-- Minimal JWT claims (user_id, role, tenant_id only — no PII)
+- Minimal JWT claims (user_id, role, organization_id only — no PII)
 - SECRET_KEY from environment variable (mandatory in production)
 
 ### RBAC Test Coverage
@@ -116,29 +107,28 @@ This audit identified **14 vulnerabilities** across the original codebase rangin
 
 ### Immediate (Current Architecture)
 
-1. **Redis caching for evaluation** — Cache flag+rules by key for `EVALUATION_CACHE_TTL` seconds. Already configured in production settings.
-2. **Database read replicas** — Route evaluation queries to read replica.
-3. **Async analytics recording** — Move `AnalyticsService.record_evaluation()` to Celery task to avoid blocking evaluation response.
+1. **Redis caching for dashboards** — cache aggregated metrics for short intervals.
+2. **Database read replicas** — route analytics reads to replicas.
+3. **Async audit ingestion** — write audit logs asynchronously in high-throughput deployments.
 
 ### Medium Term
 
-4. **API key authentication for SDK** — Replace `X-Tenant-Slug` with proper API keys with rate limiting per key.
-5. **Evaluation response caching** — HTTP-level caching with `Cache-Control` headers for SDK clients.
-6. **Database partitioning** — Partition `EvaluationEvent` table by month for analytics performance.
+4. **API key authentication for integrations** — Add API keys for external clients with rate limiting per key.
+5. **Dashboard response caching** — HTTP-level caching for read-only analytics endpoints.
+6. **Database partitioning** — Partition large audit/time-entry tables by month for reporting performance.
 
 ### Long Term
 
-7. **Edge evaluation** — Push flag configs to CDN edge nodes for sub-10ms evaluation.
-8. **Event streaming** — Replace synchronous analytics writes with Kafka/Redis Streams.
-9. **Tenant sharding** — Shard database by tenant for horizontal scaling beyond 10K tenants.
+7. **Event streaming** — replace synchronous analytics writes with Kafka/Redis Streams.
+8. **Org-level partitioning** — partition large audit/time-entry tables by time.
 
 ---
 
 ## Conclusion
 
-All 17 identified vulnerabilities have been remediated. The system enforces:
+All identified vulnerabilities have been remediated. The system enforces:
 
-- **Tenant isolation** at middleware, view, and service layers with comprehensive cross-tenant denial tests
+- **Organization isolation** at view and service layers with comprehensive cross-organization denial tests
 - **Authentication hardening** with short-lived JWTs, token blacklisting, and minimal claims
 - **Authorization hardening** with server-side RBAC, mass-assignment protection, and privilege escalation prevention
 - **Data leak prevention** with custom exception handler, structured logging, and no debug mode in production

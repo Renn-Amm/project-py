@@ -6,15 +6,32 @@ from apps.accounts.models import User
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ("email", "role", "tenant", "is_active", "created_at")
-    list_filter = ("role", "is_active", "tenant")
+    list_display = ("email", "role", "organization", "is_active", "created_at")
+    list_filter = ("role", "is_active", "organization")
     search_fields = ("email", "first_name", "last_name")
     ordering = ("-created_at",)
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         ("Personal", {"fields": ("first_name", "last_name")}),
-        ("Access", {"fields": ("role", "tenant", "is_active", "is_staff", "is_superuser")}),
+        (
+            "Access",
+            {
+                "fields": (
+                    "role",
+                    "organization",
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                )
+            },
+        ),
     )
     add_fieldsets = (
-        (None, {"classes": ("wide",), "fields": ("email", "password1", "password2", "role", "tenant")}),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2", "role", "organization"),
+            },
+        ),
     )

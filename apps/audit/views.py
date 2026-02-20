@@ -13,7 +13,7 @@ class AuditLogListView(generics.ListAPIView):
 
     def get_queryset(self):
         return AuditLog.objects.filter(
-            tenant=self.request.user.tenant
+            organization=self.request.user.organization
         ).select_related("actor")
 
 
@@ -23,7 +23,7 @@ class AuditLogObjectView(generics.ListAPIView):
 
     def get_queryset(self):
         return AuditLog.objects.filter(
-            tenant=self.request.user.tenant,
+            organization=self.request.user.organization,
             object_type=self.kwargs["object_type"],
             object_id=self.kwargs["object_id"],
         ).select_related("actor")

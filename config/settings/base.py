@@ -24,12 +24,12 @@ INSTALLED_APPS = [
     "django_filters",
     # Local apps
     "apps.accounts",
-    "apps.tenants",
-    "apps.feature_flags",
-    "apps.targeting",
-    "apps.policies",
+    "apps.organizations",
+    "apps.projects",
+    "apps.tasks",
+    "apps.time_tracking",
+    "apps.performance",
     "apps.audit",
-    "apps.analytics",
     "apps.dashboard",
 ]
 
@@ -42,7 +42,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "apps.tenants.middleware.TenantMiddleware",
     "apps.audit.middleware.AuditMiddleware",
 ]
 
@@ -68,7 +67,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": dj_database_url.config(
-        default="postgres://postgres:postgres@localhost:5432/featureflags",
+        default="postgres://postgres:postgres@localhost:5432/taskmanager",
         conn_max_age=600,
     )
 }
@@ -76,9 +75,13 @@ DATABASES = {
 AUTH_USER_MODEL = "accounts.User"
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-     "OPTIONS": {"min_length": 10}},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 10},
+    },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
@@ -103,9 +106,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
-    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_FILTER_BACKENDS": (
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
@@ -123,9 +124,7 @@ REST_FRAMEWORK = {
         "evaluation": "2000/minute",
     },
     "EXCEPTION_HANDLER": "apps.core.exception_handler.custom_exception_handler",
-    "DEFAULT_RENDERER_CLASSES": (
-        "rest_framework.renderers.JSONRenderer",
-    ),
+    "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
 }
 
 # SimpleJWT - Hardened
@@ -144,10 +143,6 @@ SIMPLE_JWT = {
     "TOKEN_TYPE_CLAIM": "token_type",
     "JTI_CLAIM": "jti",
 }
-
-# Feature Flag System Settings
-STALE_FLAG_DAYS = int(os.environ.get("STALE_FLAG_DAYS", "30"))
-EVALUATION_CACHE_TTL = int(os.environ.get("EVALUATION_CACHE_TTL", "60"))
 
 # Logging - Structured, no sensitive data
 LOGGING = {

@@ -60,3 +60,20 @@ pre-commit run --all-files
 - Production dependencies: `requirements/prod.txt`
 - Development dependencies: `requirements/dev.txt`
 - `requirements.txt` is a compatibility shim that includes `requirements/dev.txt`.
+
+### Regenerate lock files (pip-tools)
+
+```bash
+pip-compile requirements/prod.in -o requirements/prod.txt --generate-hashes --allow-unsafe
+pip-compile requirements/dev.in -o requirements/dev.txt --generate-hashes --allow-unsafe
+```
+
+## Windows pre-push checklist
+
+```bash
+ruff check apps config tests
+mypy apps config
+DJANGO_ENV=test pytest
+python manage.py makemigrations --check --dry-run
+docker build -t task-manager:local .
+```

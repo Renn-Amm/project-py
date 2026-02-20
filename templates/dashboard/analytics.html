@@ -1,122 +1,38 @@
 {% extends "base.html" %}
-{% block title %}Analytics — Feature Flag Manager{% endblock %}
+{% block title %}Analytics — Task Manager{% endblock %}
 
 {% block content %}
 <div class="mb-6">
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h2>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Evaluation metrics for the last 7 days</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Organization-level throughput and time metrics</p>
 </div>
 
-<!-- Summary Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Evaluations</span>
-            <div class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center">
-                <svg class="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            </div>
-        </div>
-        <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ analytics.total_evaluations|default:"0" }}</div>
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Tasks completed (7d)</div>
+        <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ analytics.completed_7d|default:"0" }}</div>
     </div>
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Unique Users</span>
-            <div class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
-                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
-        </div>
-        <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{{ analytics.unique_users|default:"0" }}</div>
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Hours logged (7d)</div>
+        <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ analytics.hours_7d|default:"0" }}</div>
     </div>
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Unique Flags Evaluated</span>
-            <div class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
-            </div>
-        </div>
-        <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ analytics.unique_flags|default:"0" }}</div>
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Open overdue</div>
+        <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ analytics.overdue_open|default:"0" }}</div>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Top Flags -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-        <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Top Flags by Evaluations</h3>
-        </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
-            {% for item in analytics.top_flags %}
-            <div class="px-5 py-3 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <span class="w-6 h-6 rounded bg-brand/10 flex items-center justify-center text-xs font-bold text-brand">{{ forloop.counter }}</span>
-                    <span class="text-sm font-mono text-gray-900 dark:text-white">{{ item.flag_key }}</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="w-32 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        {% if analytics.top_flags.0.count %}
-                        <div class="h-full bg-brand rounded-full" style="width: {% widthratio item.count analytics.top_flags.0.count 100 %}%"></div>
-                        {% endif %}
-                    </div>
-                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 w-16 text-right">{{ item.count }}</span>
-                </div>
-            </div>
-            {% empty %}
-            <div class="px-5 py-8 text-center text-sm text-gray-400">No evaluation data yet</div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Variant Distribution -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-        <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Variant Distribution (Top Flags)</h3>
-        </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
-            {% for item in analytics.variant_distribution %}
-            <div class="px-5 py-3">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-mono text-gray-900 dark:text-white">{{ item.flag_key }}</span>
-                </div>
-                <div class="flex gap-1 h-3 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                    {% for variant in item.variants %}
-                    <div class="h-full {% cycle 'bg-brand' 'bg-emerald-500' 'bg-amber-500' 'bg-red-500' 'bg-blue-500' %}" style="width: {{ variant.pct }}%" title="{{ variant.value }}: {{ variant.count }} ({{ variant.pct }}%)"></div>
-                    {% endfor %}
-                </div>
-                <div class="flex flex-wrap gap-3 mt-1.5">
-                    {% for variant in item.variants %}
-                    <span class="text-xs text-gray-500 dark:text-gray-400">
-                        <span class="inline-block w-2 h-2 rounded-full mr-1 {% cycle 'bg-brand' 'bg-emerald-500' 'bg-amber-500' 'bg-red-500' 'bg-blue-500' %}"></span>
-                        {{ variant.value|truncatechars:20 }}: {{ variant.pct }}%
-                    </span>
-                    {% endfor %}
-                </div>
-            </div>
-            {% empty %}
-            <div class="px-5 py-8 text-center text-sm text-gray-400">No variant distribution data yet</div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-
-<!-- Daily Evaluations Chart -->
-<div class="mt-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Daily Evaluations (Last 7 Days)</h3>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Tasks by status</h3>
     </div>
-    <div class="p-5">
-        {% if analytics.daily_evaluations %}
-        <div class="flex items-end gap-2 h-40">
-            {% for day in analytics.daily_evaluations %}
-            <div class="flex-1 flex flex-col items-center gap-1">
-                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ day.count }}</span>
-                <div class="w-full bg-brand/80 rounded-t-md transition-all hover:bg-brand" style="height: {% if analytics.max_daily > 0 %}{% widthratio day.count analytics.max_daily 128 %}{% else %}4{% endif %}px; min-height: 4px;"></div>
-                <span class="text-xs text-gray-500 dark:text-gray-400">{{ day.date|date:"D" }}</span>
-            </div>
-            {% endfor %}
+    <div class="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for row in analytics.by_status %}
+        <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900/30">
+            <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ row.label }}</div>
+            <div class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ row.count }}</div>
         </div>
-        {% else %}
-        <div class="h-40 flex items-center justify-center text-sm text-gray-400">No evaluation data for the last 7 days</div>
-        {% endif %}
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

@@ -1,17 +1,17 @@
 # Assumptions and Constraints
 
 ## Assumptions
-- Tenants are attached to users (single-tenant per user) in the current model.
-- Environments are limited to development/staging/production.
+- Organizations are attached to users (single-organization per user) in the current model.
+- Projects are the primary authorization boundary under an organization.
 
 ## Simplifications
 - Dashboard is server-rendered using Django templates (no SPA).
 - Local dev uses docker-compose with Postgres.
 
 ## Known limitations
-- Full-featured tenant membership (many-to-many users<->tenants) is not implemented.
-- Fine-grained per-flag permissions are not implemented.
+- Full-featured org memberships (many-to-many users<->organizations) is not implemented.
+- Fine-grained per-task permissions beyond role + membership are not implemented.
 
 ## Postponed features
 - Rate-limited admin actions.
-- Advanced experiment statistics.
+- More advanced analytics (trend charts, per-project throughput).

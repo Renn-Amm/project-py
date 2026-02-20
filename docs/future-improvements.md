@@ -1,9 +1,9 @@
 # Future Improvements
 
 ## Feature roadmap
-- Multi-tenant memberships and teams.
-- Self-serve API keys and scoped evaluation credentials.
-- Per-flag permissions and approval policies.
+- Multi-organization memberships and teams.
+- More workflow states and per-project policies.
+- Expanded analytics and reporting exports.
 
 ## Technical debt
 - Increase mypy coverage and reduce `ignore_missing_imports`.
@@ -14,5 +14,5 @@
 - Add SAST tooling (bandit/semgrep) as optional CI job.
 
 ## Scalability improvements
-- Redis caching for evaluation results with tenant+flag+user key.
-- Async ingestion for analytics events.
+- Redis caching for dashboard aggregations.
+- Async ingestion for audit/analytics events.

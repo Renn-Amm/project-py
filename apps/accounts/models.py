@@ -8,15 +8,17 @@ from django.db import models
 
 class UserRole(models.TextChoices):
     OWNER = "owner", "Owner"
-    ADMIN = "admin", "Admin"
+    PROJECT_MANAGER = "project_manager", "Project Manager"
     DEVELOPER = "developer", "Developer"
+    REVIEWER = "reviewer", "Reviewer"
     VIEWER = "viewer", "Viewer"
 
 
 ROLE_HIERARCHY = {
     UserRole.OWNER: 4,
-    UserRole.ADMIN: 3,
+    UserRole.PROJECT_MANAGER: 3,
     UserRole.DEVELOPER: 2,
+    UserRole.REVIEWER: 2,
     UserRole.VIEWER: 1,
 }
 
@@ -47,8 +49,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=UserRole.choices,
         default=UserRole.VIEWER,
     )
-    tenant = models.ForeignKey(
-        "tenants.Tenant",
+    organization = models.ForeignKey(
+        "organizations.Organization",
         on_delete=models.CASCADE,
         related_name="users",
         null=True,

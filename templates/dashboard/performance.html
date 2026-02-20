@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Performance — Task Manager{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Performance</h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Time logged and task throughput for your organization</p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Hours (30d)</div>
+        <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ metrics.hours_30d|default:"0" }}</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Tasks completed (30d)</div>
+        <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ metrics.completed_30d|default:"0" }}</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Overdue open</div>
+        <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ metrics.overdue_open|default:"0" }}</div>
+    </div>
+</div>
+
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Top members (30d)</h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Member</th>
+                    <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Hours</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                {% for row in metrics.top_members %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td class="px-5 py-3 text-sm text-gray-700 dark:text-gray-300">{{ row.email }}</td>
+                    <td class="px-5 py-3 text-sm text-gray-700 dark:text-gray-300 text-right font-mono">{{ row.hours }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No time entries yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

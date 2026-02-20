@@ -12,7 +12,7 @@ class IsAdminOrAbove(BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
-            and request.user.role_level >= ROLE_HIERARCHY[UserRole.ADMIN]
+            and request.user.role_level >= ROLE_HIERARCHY[UserRole.PROJECT_MANAGER]
         )
 
 
@@ -39,7 +39,7 @@ class RoleBasedPermission(BasePermission):
         "POST": UserRole.DEVELOPER,
         "PUT": UserRole.DEVELOPER,
         "PATCH": UserRole.DEVELOPER,
-        "DELETE": UserRole.ADMIN,
+        "DELETE": UserRole.PROJECT_MANAGER,
     }
 
     def has_permission(self, request, view):

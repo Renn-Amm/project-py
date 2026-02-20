@@ -2,44 +2,40 @@
 
 ## Target users
 
-## Tenant Owner
-- Manage tenant, environments, users, and policies.
-- Approve high-risk production changes.
+## Organization Owner
+- Create the organization and manage membership.
+- Override workflow rules when needed.
 
-## Product Manager
-- Define flags, rollouts, targeting rules, and experiments.
-- Request approvals for production changes.
+## Project Manager
+- Create projects.
+- Assign members.
+- Archive tasks.
 
 ## Developer
-- Integrate evaluation API in services/clients.
-- Debug flag behavior via audit logs and analytics.
+- Execute assigned tasks and move work through the workflow.
+- Log time and collaborate through review.
 
-## Analyst
-- Inspect adoption, evaluation counts, and experiment outcomes.
+## Reviewer
+- Review tasks and approve work in "In Review".
 
 ## Functional requirements
-- Multi-tenant isolation for all data access.
-- Multi-environment support per tenant.
-- Feature flags with variants and deterministic percentage rollout.
-- Targeting rules against user attributes.
-- Experiment mode with control/treatment support.
-- Flag dependencies.
-- Time-based activation and expiration.
-- Stale flag detection.
-- Risk levels and approval workflow for high-risk production changes.
-- Full audit logging for all mutations.
-- Analytics tracking of evaluations.
-- Secure evaluation API endpoint with throttling.
+- Organization isolation for all reads/writes.
+- Project membership enforcement.
+- Task workflow state machine with role-restricted transitions.
+- Review-gated completion (cannot complete without approval).
+- Time logging per task with restrictions.
+- Overdue detection.
+- Audit log visibility.
+- Analytics/performance dashboards.
 
 ## Non-functional requirements
-- Security: strict tenant isolation, RBAC, object-level permissions.
-- Reliability: transactional updates, race-condition protection on sensitive writes.
-- Performance: evaluation endpoint targeting < 100ms, proper indexing, caching option.
+- Security: strict org isolation, RBAC, object-level permissions.
+- Reliability: transactional workflow transitions.
+- Performance: efficient list endpoints and dashboard queries.
 - Operability: production settings, Docker/Gunicorn, health checks.
 
 ## How the implementation satisfies the requirements
-- Tenant isolation: enforced by tenant scoping on queries and middleware context.
-- RBAC: role hierarchy with explicit checks on mutation endpoints.
-- Approval workflow: service-layer enforcement for production high-risk changes.
-- Deterministic rollout: SHA-256 hashing based assignment.
-- Audit + analytics: write-side middleware/services track mutations and evaluations.
+- Organization isolation: enforced by org scoping on queries.
+- RBAC/workflow: enforced by `TaskWorkflowService` with atomic transitions.
+- Time tracking: enforced by `TimeEntryService`.
+- Audit + dashboards: audit middleware + dashboard views.

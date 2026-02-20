@@ -12,12 +12,12 @@
   - Models: represent core entities.
   - Services: transactional business logic, validation, race-condition protection.
   - API views/serializers: request/response validation and permission gates.
-  - Middleware: tenant context and audit logging.
+  - Middleware: audit logging.
 
 ## Key design decisions
-- Tenant isolation via explicit query scoping and middleware.
-- Deterministic rollout using hashing to avoid per-request randomness.
-- Approval workflow enforced in service layer to prevent bypass.
+- Organization isolation via explicit query scoping.
+- Workflow rules enforced in service layer to prevent bypass.
+- Atomic transitions via `select_for_update()`.
 
 ## Tradeoffs
 - Centralized service layer increases indirection but makes invariants enforceable.

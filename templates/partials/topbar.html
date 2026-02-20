@@ -5,28 +5,11 @@
     </div>
 
     <div class="flex items-center gap-4">
-        <!-- Environment Selector -->
-        {% if environments %}
-        <form method="get" id="env-selector-form">
-            <select name="environment"
-                    onchange="this.form.submit()"
-                    class="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-brand focus:border-brand">
-                <option value="">All Environments</option>
-                {% for env in environments %}
-                <option value="{{ env.name }}" {% if selected_environment == env.name %}selected{% endif %}>{{ env.get_name_display }}</option>
-                {% endfor %}
-            </select>
-            {% if request.GET.search %}<input type="hidden" name="search" value="{{ request.GET.search }}">{% endif %}
-            {% if request.GET.risk_level %}<input type="hidden" name="risk_level" value="{{ request.GET.risk_level }}">{% endif %}
-            {% if request.GET.status %}<input type="hidden" name="status" value="{{ request.GET.status }}">{% endif %}
-        </form>
-        {% endif %}
-
-        <!-- Tenant Badge -->
-        {% if user.tenant %}
+        <!-- Organization Badge -->
+        {% if user.organization %}
         <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-brand/10 text-brand-dark dark:text-brand-light rounded-lg text-sm font-medium">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-            {{ user.tenant.name }}
+            {{ user.organization.name }}
         </div>
         {% endif %}
 
@@ -52,7 +35,7 @@
                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
                 <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
                     <div class="text-sm font-medium truncate">{{ user.email }}</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 capitalize">{{ user.role }} &middot; {{ user.tenant.name|default:"No Tenant" }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 capitalize">{{ user.role }} &middot; {{ user.organization.name|default:"No Organization" }}</div>
                 </div>
                 <a href="{% url 'dashboard_home' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Dashboard</a>
                 <form method="post" action="{% url 'dashboard_logout' %}">

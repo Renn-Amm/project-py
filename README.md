@@ -1,6 +1,6 @@
-# Feature Flag Management System
+# Task Manager
 
-A production-grade, multi-tenant SaaS Feature Flag Management System built with Django and Django REST Framework.
+A production-grade, organization-isolated Task Management system built with Django and Django REST Framework.
 
 ## Architecture
 
@@ -17,14 +17,14 @@ project/
 │   └── wsgi.py
 ├── apps/
 │   ├── accounts/              # User model, JWT auth, RBAC
-│   ├── tenants/               # Tenant model, environments, middleware
-│   ├── feature_flags/         # Flags, variants, evaluation engine
-│   ├── targeting/             # Targeting rules, operators
-│   ├── policies/              # Policy engine, approval workflow
+│   ├── organizations/         # Organization model
+│   ├── projects/              # Projects + membership
+│   ├── tasks/                 # Tasks + workflow state machine
+│   ├── time_tracking/         # Time entries (restricted edits)
 │   ├── audit/                 # Audit logging, middleware
-│   ├── analytics/             # Evaluation events, analytics
+│   ├── performance/           # Performance app placeholder
 │   ├── core/                  # Health check, exception handler
-│   └── dashboard/             # Admin dashboard (Django templates)
+│   └── dashboard/             # Server-rendered dashboard (Django templates)
 ├── tests/                     # Comprehensive test suite
 ├── templates/                 # Dashboard HTML templates
 ├── .github/workflows/ci.yml   # CI pipeline
@@ -49,20 +49,15 @@ project/
 
 ## Key Features
 
-- **Multi-tenant isolation** — All queries scoped by tenant; middleware rejects orphaned users
-- **Multi-environment** — development, staging, production per tenant
-- **Advanced targeting** — User ID, role, country, email, custom attributes with 11 operators
-- **Percentage rollout** — Deterministic hashing (SHA-256) for consistent user assignment
-- **Experiment mode** — A/B testing with control/treatment variants
-- **Time-based activation** — Schedule flag activation and auto-expiration
-- **Flag dependencies** — Child flags auto-disable when parent is off
-- **Kill switch** — Instant emergency disable
-- **Approval workflow** — High/critical risk production flags require admin approval
-- **Policy engine** — Configurable rules (key immutability, production-owner-only, etc.)
-- **Audit logging** — Automatic middleware-based logging of all mutations
-- **Analytics** — Evaluation tracking, variant distribution, experiment results
-- **Stale flag detection** — Flags not evaluated in N days flagged for cleanup
-- **Role-based access control** — Owner > Admin > Developer > Viewer hierarchy
+- **Organization isolation** — All reads/writes are scoped to `user.organization`
+- **Project membership enforcement** — Only members can view/change a project
+- **Workflow state machine** — Backend-enforced transitions + role restrictions
+- **Review-gated completion** — Cannot complete a task without reviewer approval
+- **Overdue detection** — Scheduled management command marks overdue tasks
+- **Time tracking** — Log time per task; restricted editing rules
+- **Audit logging** — Tracks status changes and important mutations
+- **Analytics** — Dashboard metrics for throughput/time
+- **Role-based access control** — Owner > Project Manager > Developer > Viewer
 
 ## Quick Start
 
@@ -90,8 +85,6 @@ docker-compose exec web pytest
 | `ALLOWED_HOSTS`       | Yes (prod) | *                      | Comma-separated hostnames      |
 | `CORS_ALLOWED_ORIGINS`| Yes (prod) |                        | Comma-separated origins        |
 | `REDIS_URL`           | No       | redis://localhost:6379/0 | Redis for caching (prod)       |
-| `STALE_FLAG_DAYS`     | No       | 30                       | Days before flag marked stale  |
-| `EVALUATION_CACHE_TTL`| No       | 60                       | Cache TTL in seconds           |
 
 ## API Endpoints
 
@@ -105,72 +98,27 @@ docker-compose exec web pytest
 | GET    | `/api/auth/profile/`      | Get current user     |
 | POST   | `/api/auth/change-password/` | Change password   |
 
-### Feature Flags
-| Method | Endpoint                        | Description            |
-|--------|---------------------------------|------------------------|
-| GET    | `/api/flags/`                   | List flags (filtered)  |
-| POST   | `/api/flags/create/`            | Create flag            |
-| GET    | `/api/flags/<id>/`              | Flag detail            |
-| PATCH  | `/api/flags/<id>/`              | Update flag            |
-| DELETE | `/api/flags/<id>/`              | Delete flag            |
-| POST   | `/api/flags/<id>/toggle/`       | Toggle enabled state   |
-| POST   | `/api/flags/<id>/variants/`     | Set variants           |
-| POST   | `/api/flags/<id>/archive/`      | Archive flag           |
-| POST   | `/api/flags/<id>/kill-switch/`  | Activate/deactivate    |
-| GET    | `/api/flags/stale/`             | List stale flags       |
+### Projects
+| Method | Endpoint                     | Description           |
+|--------|------------------------------|-----------------------|
+| GET    | `/api/projects/`             | List projects         |
+| POST   | `/api/projects/`             | Create project        |
+| GET    | `/api/projects/<id>/`        | Project detail        |
+| PATCH  | `/api/projects/<id>/`        | Update project        |
 
-### Evaluation (SDK Endpoint)
-| Method | Endpoint          | Description                |
-|--------|-------------------|----------------------------|
-| POST   | `/api/evaluate/`  | Evaluate flag for user     |
+### Tasks
+| Method | Endpoint                                   | Description                 |
+|--------|--------------------------------------------|-----------------------------|
+| GET    | `/api/tasks/`                               | List tasks (filters)        |
+| POST   | `/api/projects/<project_id>/tasks/`         | Create task                 |
+| GET    | `/api/tasks/<id>/`                          | Task detail                 |
+| POST   | `/api/tasks/<id>/transition/`               | Workflow transition         |
+| POST   | `/api/tasks/<id>/time-entries/`             | Log time for task           |
 
-**Headers:** `X-Tenant-Slug: <tenant-slug>`
-
-**Request:**
-```json
-{
-  "flag_key": "new-checkout",
-  "user_identifier": "user-123",
-  "environment": "production",
-  "attributes": {"country": "US", "plan": "enterprise"}
-}
-```
-
-**Response:**
-```json
-{
-  "variant": {"checkout_v2": true},
-  "reason": "targeting_rule_match",
-  "rule_matched": null
-}
-```
-
-### Targeting Rules
-| Method | Endpoint                              | Description       |
-|--------|---------------------------------------|--------------------|
-| GET    | `/api/targeting/flags/<id>/rules/`    | List rules for flag|
-| POST   | `/api/targeting/rules/`               | Create rule        |
-| PATCH  | `/api/targeting/rules/<id>/`          | Update rule        |
-| DELETE | `/api/targeting/rules/<id>/`          | Delete rule        |
-
-### Policies & Approvals
-| Method | Endpoint                                  | Description          |
-|--------|-------------------------------------------|----------------------|
-| GET    | `/api/policies/`                          | List policies        |
-| POST   | `/api/policies/<id>/toggle/`              | Toggle policy        |
-| GET    | `/api/policies/approvals/`                | Approval queue       |
-| POST   | `/api/policies/approvals/create/`         | Request approval     |
-| POST   | `/api/policies/approvals/<id>/approve/`   | Approve request      |
-| POST   | `/api/policies/approvals/<id>/reject/`    | Reject request       |
-
-### Audit & Analytics
-| Method | Endpoint                                       | Description           |
-|--------|------------------------------------------------|-----------------------|
-| GET    | `/api/audit/logs/`                             | List audit logs       |
-| GET    | `/api/audit/logs/<type>/<id>/`                 | Object audit history  |
-| GET    | `/api/analytics/summary/`                      | Tenant analytics      |
-| GET    | `/api/analytics/flags/<id>/`                   | Flag analytics        |
-| GET    | `/api/analytics/experiments/<id>/`             | Experiment results    |
+### Audit
+| Method | Endpoint                | Description     |
+|--------|-------------------------|-----------------|
+| GET    | `/api/audit/logs/`      | List audit logs |
 
 ### Health
 | Method | Endpoint          | Description       |
@@ -189,19 +137,11 @@ All business rules enforced at **three layers**:
 
 | Rule                                          | Enforcement Layer        |
 |-----------------------------------------------|--------------------------|
-| Flag key unique per tenant+environment        | DB unique_together + service |
-| Variant percentages sum to 100                | Service layer validation |
-| Cannot modify archived flags                  | Model clean + service    |
-| Cannot enable flag with kill switch active    | Service layer            |
-| Production high-risk flags require approval   | Service + policy engine  |
-| Cannot delete flag with active dependents     | Service layer            |
-| Key immutable after creation                  | Service + policy engine  |
-| Tenant isolation on all queries               | Middleware + view layer  |
-| Role-based access on all endpoints            | Permission classes       |
-| Cannot approve own request                    | Service layer            |
-| Expired flags auto-deactivate                 | Service layer            |
-| Dependencies must be same environment         | Model validation         |
-| Self-dependency rejected                      | Model validation         |
+| Organization isolation on all queries         | View/service scoping     |
+| Role-restricted task transitions              | Service layer            |
+| Cannot complete without review approval       | Service layer            |
+| Overdue detection not removable manually      | Model/service + cron cmd |
+| Time entry edit restrictions                  | Service layer            |
 
 ## Backup & Recovery Strategy
 
@@ -227,10 +167,7 @@ All business rules enforced at **three layers**:
 DJANGO_ENV=test pytest
 
 # Specific test file
-DJANGO_ENV=test pytest tests/test_feature_flags.py
-
-# Specific test class
-DJANGO_ENV=test pytest tests/test_tenant_isolation.py::TestCrossTenantFlagAccess
+DJANGO_ENV=test pytest tests/test_overdue_job.py
 ```
 
 ## CI Pipeline

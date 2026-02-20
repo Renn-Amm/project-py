@@ -34,6 +34,8 @@ COPY . .
 
 RUN python manage.py collectstatic --noinput 2>/dev/null || true
 
+RUN mkdir -p /var/log/taskmanager && chown -R appuser:appuser /var/log/taskmanager
+
 RUN chown -R appuser:appuser /app
 USER appuser
 

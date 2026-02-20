@@ -11,10 +11,9 @@ logger = logging.getLogger(__name__)
 AUDIT_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 
 AUDIT_PATH_PREFIXES = [
-    "/api/flags/",
-    "/api/targeting/",
-    "/api/policies/",
-    "/api/tenants/",
+    "/api/projects/",
+    "/api/tasks/",
+    "/api/time-entries/",
 ]
 
 
@@ -37,13 +36,13 @@ class AuditMiddleware(MiddlewareMixin):
         try:
             action = self._determine_action(request)
             object_type, object_id = self._extract_object_info(request, response)
-            tenant = getattr(request, "tenant", None) or getattr(request.user, "tenant", None)
+            organization = getattr(request.user, "organization", None)
 
-            if tenant and object_type:
+            if organization and object_type:
                 ip = self._get_client_ip(request)
                 AuditService.log(
                     actor=request.user,
-                    tenant=tenant,
+                    organization=organization,
                     action=action,
                     object_type=object_type,
                     object_id=object_id or "unknown",
@@ -82,16 +81,12 @@ class AuditMiddleware(MiddlewareMixin):
         object_type = "unknown"
         object_id = "unknown"
 
-        if "flags" in path_parts:
-            object_type = "FeatureFlag"
-        elif "targeting" in path_parts or "rules" in path_parts:
-            object_type = "TargetingRule"
-        elif "policies" in path_parts:
-            object_type = "Policy"
-        elif "approvals" in path_parts:
-            object_type = "ApprovalRequest"
-        elif "tenants" in path_parts:
-            object_type = "Tenant"
+        if "projects" in path_parts:
+            object_type = "Project"
+        elif "tasks" in path_parts:
+            object_type = "Task"
+        elif "time-entries" in path_parts:
+            object_type = "TimeEntry"
 
         for part in path_parts:
             if part.isdigit():
@@ -123,10 +118,7 @@ class AuditMiddleware(MiddlewareMixin):
             if body:
                 data = json.loads(body)
                 sensitive_keys = {"password", "token", "secret"}
-                return {
-                    k: "***" if k in sensitive_keys else v
-                    for k, v in data.items()
-                }
+                return {k: "***" if k in sensitive_keys else v for k, v in data.items()}
         except (json.JSONDecodeError, AttributeError):
             pass
         return {}

@@ -6,34 +6,87 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('tenants', '0001_initial'),
+        ("organizations", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AuditLog',
+            name="AuditLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action', models.CharField(choices=[('create', 'Create'), ('update', 'Update'), ('delete', 'Delete'), ('toggle', 'Toggle'), ('archive', 'Archive'), ('approve', 'Approve'), ('reject', 'Reject'), ('kill_switch', 'Kill Switch'), ('rollback', 'Rollback'), ('login', 'Login')], db_index=True, max_length=30)),
-                ('object_type', models.CharField(db_index=True, max_length=100)),
-                ('object_id', models.CharField(max_length=100)),
-                ('object_repr', models.CharField(blank=True, default='', max_length=500)),
-                ('metadata', models.JSONField(blank=True, default=dict)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('user_agent', models.TextField(blank=True, default='')),
-                ('timestamp', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('actor', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='audit_logs', to=settings.AUTH_USER_MODEL)),
-                ('tenant', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='audit_logs', to='tenants.tenant')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[
+                            ("create", "Create"),
+                            ("update", "Update"),
+                            ("delete", "Delete"),
+                            ("toggle", "Toggle"),
+                            ("archive", "Archive"),
+                            ("approve", "Approve"),
+                            ("reject", "Reject"),
+                            ("kill_switch", "Kill Switch"),
+                            ("rollback", "Rollback"),
+                            ("login", "Login"),
+                        ],
+                        db_index=True,
+                        max_length=30,
+                    ),
+                ),
+                ("object_type", models.CharField(db_index=True, max_length=100)),
+                ("object_id", models.CharField(max_length=100)),
+                (
+                    "object_repr",
+                    models.CharField(blank=True, default="", max_length=500),
+                ),
+                ("metadata", models.JSONField(blank=True, default=dict)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("user_agent", models.TextField(blank=True, default="")),
+                ("timestamp", models.DateTimeField(auto_now_add=True, db_index=True)),
+                (
+                    "actor",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="audit_logs",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="audit_logs",
+                        to="organizations.organization",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'audit_auditlog',
-                'ordering': ['-timestamp'],
-                'indexes': [models.Index(fields=['tenant', '-timestamp'], name='audit_audit_tenant__1b7744_idx'), models.Index(fields=['object_type', 'object_id'], name='audit_audit_object__1f9df3_idx')],
+                "db_table": "audit_auditlog",
+                "ordering": ["-timestamp"],
+                "indexes": [
+                    models.Index(
+                        fields=["organization", "-timestamp"],
+                        name="audit_audit_organiz_1c5c31_idx",
+                    ),
+                    models.Index(
+                        fields=["object_type", "object_id"],
+                        name="audit_audit_object__1f9df3_idx",
+                    ),
+                ],
             },
         ),
     ]

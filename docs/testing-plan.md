@@ -2,27 +2,25 @@
 
 ## Manual QA scenarios
 - Login/logout flows.
-- Create flag in dev/staging; verify visibility for tenant only.
-- Configure variants for multivariate/experiment; validate percentages sum to 100.
-- Add/delete targeting rules and verify ordering/priority.
-- Attempt cross-tenant access via API (should be 404/403).
-- Production high-risk flag modification should require approval.
-- Approval queue: approve/reject with reason; verify state changes.
-- Kill switch: activate disables flag immediately.
-- Analytics dashboard: verify counts and charts render.
+- Create organization and project; verify only members can access.
+- Create tasks and verify Kanban reflects workflow state.
+- Attempt invalid transitions (e.g. complete without approval) should fail.
+- Log time for a task; verify restrictions (negative time rejected; edit window enforced).
+- Overdue: set deadline in the past; run overdue job; verify indicator.
+- Audit dashboard: verify logs appear.
+- Analytics/performance dashboards: verify metrics render.
 
 ## Automated testing
 
 ### Unit
-- Service methods (variant validation, toggles, approvals, policy checks).
+- Service methods (workflow transitions, time entry restrictions, overdue marking).
 
 ### Integration
-- API endpoints with JWT auth, tenant scoping, and DB assertions.
+- API endpoints with JWT auth, org scoping, and DB assertions.
 
 ### Security
-- Cross-tenant access attempts.
+- Cross-organization access attempts.
 - Privilege escalation attempts.
-- Unauthorized production modifications.
 
 ### Performance
 - Basic evaluation endpoint timing checks (smoke-level) and query-count assertions.

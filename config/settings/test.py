@@ -1,5 +1,7 @@
 from config.settings.base import *  # noqa: F401, F403
 
+from typing import Any
+
 DEBUG = False
 
 SECRET_KEY = "test-secret-key-for-ci-only"
@@ -13,13 +15,13 @@ if not os.environ.get("DATABASE_URL"):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "test_featureflags",
+            "NAME": "test_taskmanager",
             "USER": "postgres",
             "PASSWORD": "postgres",
             "HOST": "localhost",
             "PORT": "5432",
             "TEST": {
-                "NAME": "test_featureflags",
+                "NAME": "test_taskmanager",
             },
         }
     }
@@ -35,7 +37,7 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
-CACHES = {
+CACHES: dict[str, dict[str, Any]] = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }

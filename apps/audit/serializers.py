@@ -4,13 +4,23 @@ from apps.audit.models import AuditLog
 
 
 class AuditLogSerializer(serializers.ModelSerializer):
-    actor_email = serializers.EmailField(source="actor.email", read_only=True, default=None)
+    actor_email = serializers.EmailField(
+        source="actor.email", read_only=True, default=None
+    )
 
     class Meta:
         model = AuditLog
         fields = [
-            "id", "actor", "actor_email", "tenant", "action",
-            "object_type", "object_id", "object_repr", "metadata",
-            "ip_address", "timestamp",
+            "id",
+            "actor",
+            "actor_email",
+            "organization",
+            "action",
+            "object_type",
+            "object_id",
+            "object_repr",
+            "metadata",
+            "ip_address",
+            "timestamp",
         ]
         read_only_fields = fields

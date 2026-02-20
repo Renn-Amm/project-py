@@ -4,7 +4,7 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: featureflags
+      POSTGRES_DB: taskmanager
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
@@ -24,8 +24,9 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/featureflags
+      DATABASE_URL: postgres://postgres:postgres@db:5432/taskmanager
       DJANGO_SETTINGS_MODULE: config.settings
+      DJANGO_ENV: development
       SECRET_KEY: dev-secret-key-change-in-production
       DEBUG: "true"
 
