@@ -440,7 +440,7 @@ def invitation_create_view(request):
         messages.error(request, "This user is already in your organization.")
         return redirect("dashboard_invitations")
 
-    if Invitation.objects.filter(email=email, organization=org, is_used=False).exists():
+    if Invitation.objects.filter(email=email, organization=org, used_at__isnull=True).exists():
         messages.error(request, "An active invitation already exists for this email.")
         return redirect("dashboard_invitations")
 
