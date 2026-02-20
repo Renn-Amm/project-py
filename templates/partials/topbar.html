@@ -41,8 +41,7 @@
                     {{ user.email|first|upper }}
                 </div>
                 <div class="hidden sm:block text-left">
-                    <div class="text-sm font-semibold text-gray-800 dark:text-white">{{
-                        user.first_name|default:user.email }}</div>
+                    <div class="text-sm font-semibold text-gray-800 dark:text-white">{{ user.first_name|default:user.email }}</div>
                     <div class="text-[11px] text-gray-400 dark:text-white/40 capitalize">{{ user.role }}</div>
                 </div>
                 <svg class="w-4 h-4 text-gray-400 dark:text-white/30" fill="none" viewBox="0 0 24 24"
@@ -56,8 +55,7 @@
                 class="absolute right-0 mt-2 w-52 bg-white dark:bg-[#162032] rounded-xl shadow-xl border border-gray-200/60 dark:border-white/[.08] py-1.5 z-50">
                 <div class="px-4 py-2.5 border-b border-gray-100 dark:border-white/[.06]">
                     <div class="text-sm font-semibold truncate text-gray-800 dark:text-white">{{ user.email }}</div>
-                    <div class="text-[11px] text-gray-400 dark:text-white/40 capitalize mt-0.5">{{ user.role }} · {{
-                        user.organization.name|default:"No Org" }}</div>
+                    <div class="text-[11px] text-gray-400 dark:text-white/40 capitalize mt-0.5">{{ user.role }} · {{ user.organization.name|default:"No Org" }}</div>
                 </div>
                 <a href="{% url 'dashboard_home' %}"
                     class="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/[.04]">

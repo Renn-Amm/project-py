@@ -70,11 +70,9 @@
                                 <span
                                     class="w-2 h-2 rounded-full {% if col.key == 'backlog' %}bg-gray-400{% elif col.key == 'in_progress' %}bg-accent{% elif col.key == 'in_review' %}bg-brand{% elif col.key == 'approved' %}bg-success{% elif col.key == 'completed' %}bg-emerald-500{% elif col.key == 'archived' %}bg-gray-500{% else %}bg-warn{% endif %}"></span>
                                 <span
-                                    class="text-xs font-semibold text-gray-600 dark:text-white/50 uppercase tracking-wider">{{
-                                    col.label }}</span>
+                                    class="text-xs font-semibold text-gray-600 dark:text-white/50 uppercase tracking-wider">{{ col.label }}</span>
                                 <span
-                                    class="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-white/[.06] text-gray-500 dark:text-white/40 font-medium">{{
-                                    col.tasks|length }}</span>
+                                    class="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-white/[.06] text-gray-500 dark:text-white/40 font-medium">{{ col.tasks|length }}</span>
                             </div>
                             <div class="space-y-2">
                                 {% for task in col.tasks %}
@@ -137,8 +135,7 @@
                                 <div
                                     class="w-7 h-7 rounded-full bg-gradient-to-br from-brand/30 to-accent/30 flex items-center justify-center text-[11px] font-bold text-brand dark:text-brand-light">
                                     {{ m.user.email|first|upper }}</div>
-                                <span class="text-sm text-gray-700 dark:text-white/70 truncate">{{ m.user.email
-                                    }}</span>
+                                <span class="text-sm text-gray-700 dark:text-white/70 truncate">{{ m.user.email }}</span>
                             </div>
                             {% if user.role == 'owner' or user.role == 'project_manager' %}
                             {% if m.user.id != user.id %}
