@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements/prod.txt ./requirements/prod.txt
-RUN pip install --no-cache-dir --prefix=/install -r requirements/prod.txt
+RUN pip install --no-cache-dir --prefix=/install -r requirements/prod.txt && \
+    pip install --no-cache-dir --prefix=/install whitenoise
 
 # ---- Production stage ----
 FROM python:3.11-slim
@@ -32,9 +33,8 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 COPY . .
 
-RUN python manage.py collectstatic --noinput 2>/dev/null || true
-
-RUN mkdir -p /var/log/taskmanager && chown -R appuser:appuser /var/log/taskmanager
+# Collect static files (whitenoise needs this)
+RUN SECRET_KEY=build-placeholder python manage.py collectstatic --noinput
 
 RUN chown -R appuser:appuser /app
 USER appuser
@@ -42,13 +42,13 @@ USER appuser
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/')" || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT:-8000}/api/health/')" || exit 1
 
-CMD ["gunicorn", "config.wsgi:application", \
-     "--bind", "0.0.0.0:8000", \
-     "--workers", "4", \
-     "--worker-class", "gthread", \
-     "--threads", "2", \
-     "--timeout", "30", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-"]
+CMD gunicorn config.wsgi:application \
+     --bind "0.0.0.0:${PORT:-8000}" \
+     --workers 2 \
+     --worker-class gthread \
+     --threads 2 \
+     --timeout 30 \
+     --access-logfile - \
+     --error-logfile -
