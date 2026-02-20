@@ -84,6 +84,9 @@
                                     <div
                                         class="mt-1.5 flex items-center gap-2 text-xs text-gray-400 dark:text-white/30">
                                         <span class="truncate">{{ task.assignee.email|default:"Unassigned" }}</span>
+                                        {% if task.deadline %}
+                                        <span class="shrink-0">• Due {{ task.deadline|date:"M d" }}</span>
+                                        {% endif %}
                                         {% if task.priority == 'critical' %}
                                         <span
                                             class="px-1.5 py-0.5 rounded bg-danger/15 text-danger text-[10px] font-semibold">Critical</span>

@@ -39,14 +39,12 @@
                     <div>
                         <span
                             class="text-xs font-medium text-gray-400 dark:text-white/30 uppercase tracking-wider">Assignee</span>
-                        <div class="mt-1 font-semibold text-gray-800 dark:text-white truncate">{{
-                            task.assignee.email|default:"—" }}</div>
+                        <div class="mt-1 font-semibold text-gray-800 dark:text-white truncate">{{ task.assignee.email|default:"—" }}</div>
                     </div>
                     <div>
                         <span
                             class="text-xs font-medium text-gray-400 dark:text-white/30 uppercase tracking-wider">Reviewer</span>
-                        <div class="mt-1 font-semibold text-gray-800 dark:text-white truncate">{{
-                            task.reviewer.email|default:"—" }}</div>
+                        <div class="mt-1 font-semibold text-gray-800 dark:text-white truncate">{{ task.reviewer.email|default:"—" }}</div>
                     </div>
                 </div>
 
@@ -62,8 +60,7 @@
                 {% endif %}
 
                 {% if task.description %}
-                <div class="mt-4 text-sm text-gray-600 dark:text-white/50 whitespace-pre-wrap leading-relaxed">{{
-                    task.description }}</div>
+                <div class="mt-4 text-sm text-gray-600 dark:text-white/50 whitespace-pre-wrap leading-relaxed">{{ task.description }}</div>
                 {% endif %}
             </div>
 
@@ -115,8 +112,7 @@
                         </svg>
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Time Entries</h3>
                     </div>
-                    <span class="text-xs font-semibold text-brand dark:text-brand-light">{{ task.total_logged_time_hours
-                        }}h total</span>
+                    <span class="text-xs font-semibold text-brand dark:text-brand-light">{{ task.total_logged_time_hours }}h total</span>
                 </div>
                 <div class="p-6">
                     <form method="post" action="{% url 'dashboard_time_entry_create' task_pk=task.id %}"
@@ -159,25 +155,41 @@
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Details</h4>
                 <div class="space-y-3 text-sm">
                     <div class="flex justify-between"><span class="text-gray-400 dark:text-white/30">Created
-                            by</span><span class="font-medium text-gray-700 dark:text-white/70">{{ task.created_by.email
-                            }}</span></div>
+                            by</span><span class="font-medium text-gray-700 dark:text-white/70">{{ task.created_by.email }}</span></div>
                     <div class="flex justify-between"><span class="text-gray-400 dark:text-white/30">Created</span><span
-                            class="font-medium text-gray-700 dark:text-white/70">{{ task.created_at|date:"M d, Y"
-                            }}</span></div>
+                            class="font-medium text-gray-700 dark:text-white/70">{{ task.created_at|date:"M d, Y" }}</span></div>
+                    {% if task.deadline %}<div class="flex justify-between"><span
+                            class="text-gray-400 dark:text-white/30">Deadline</span><span
+                            class="font-medium text-gray-700 dark:text-white/70">{{ task.deadline|date:"M d, Y H:i" }}</span></div>{% endif %}
+                    {% if task.is_overdue %}<div class="flex justify-between"><span
+                            class="text-gray-400 dark:text-white/30">Overdue</span><span
+                            class="font-medium text-danger">Yes</span></div>{% endif %}
                     {% if task.completed_at %}<div class="flex justify-between"><span
                             class="text-gray-400 dark:text-white/30">Completed</span><span
                             class="font-medium text-success">{{ task.completed_at|date:"M d, Y" }}</span></div>{% endif
                     %}
                     {% if task.review_approved_at %}<div class="flex justify-between"><span
                             class="text-gray-400 dark:text-white/30">Approved</span><span
-                            class="font-medium text-brand dark:text-brand-light">{{ task.review_approved_at|date:"M d,
-                            Y" }}</span></div>{% endif %}
+                            class="font-medium text-brand dark:text-brand-light">{{ task.review_approved_at|date:"M d, Y" }}</span></div>{% endif %}
                     {% if task.estimated_time_hours %}<div class="flex justify-between"><span
                             class="text-gray-400 dark:text-white/30">Estimated</span><span
                             class="font-medium text-gray-700 dark:text-white/70">{{ task.estimated_time_hours }}h</span>
                     </div>{% endif %}
                 </div>
             </div>
+
+            {% if task.status != 'completed' and task.review_approved_at %}
+            <div class="rounded-2xl border border-gray-200/60 dark:border-white/[.06] bg-white dark:bg-white/[.02] p-5">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Quick Actions</h4>
+                <form method="post" action="{% url 'dashboard_task_transition' pk=task.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="to_status" value="completed" />
+                    <button
+                        class="w-full rounded-xl bg-success/10 text-success px-4 py-2.5 text-sm font-semibold hover:bg-success/15 transition-all">Mark completed</button>
+                </form>
+                <p class="mt-2 text-[11px] text-gray-400 dark:text-white/25">Completion requires review approval (enforced by backend).</p>
+            </div>
+            {% endif %}
 
             <div class="rounded-2xl border border-gray-200/60 dark:border-white/[.06] bg-white dark:bg-white/[.02] p-5">
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Audit Trail</h4>

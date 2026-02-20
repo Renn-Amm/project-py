@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -332,6 +333,25 @@ def task_create_view(request, project_pk: int):
     description = (request.POST.get("description") or "").strip()
     priority = request.POST.get("priority") or "medium"
 
+    deadline_raw = (request.POST.get("deadline") or "").strip()
+    deadline = None
+    if deadline_raw:
+        deadline = parse_datetime(deadline_raw)
+        if deadline is None:
+            messages.error(request, "Invalid deadline.")
+            return redirect("dashboard_task_create", project_pk=project_pk)
+        if timezone.is_naive(deadline):
+            deadline = timezone.make_aware(deadline)
+
+    estimated_raw = (request.POST.get("estimated_time_hours") or "").strip()
+    estimated_time_hours = None
+    if estimated_raw:
+        try:
+            estimated_time_hours = Decimal(str(estimated_raw))
+        except Exception:
+            messages.error(request, "Invalid estimate.")
+            return redirect("dashboard_task_create", project_pk=project_pk)
+
     assignee_id = request.POST.get("assignee") or None
     reviewer_id = request.POST.get("reviewer") or None
 
@@ -342,6 +362,9 @@ def task_create_view(request, project_pk: int):
     if reviewer_id:
         reviewer = User.objects.filter(pk=reviewer_id, organization=request.user.organization).first()
 
+    now = timezone.now()
+    is_overdue = bool(deadline and deadline < now)
+
     Task.objects.create(
         project=project,
         title=title,
@@ -349,6 +372,10 @@ def task_create_view(request, project_pk: int):
         priority=priority,
         assignee=assignee,
         reviewer=reviewer,
+        deadline=deadline,
+        estimated_time_hours=estimated_time_hours,
+        is_overdue=is_overdue,
+        overdue_marked_at=now if is_overdue else None,
         created_by=request.user,
     )
     messages.success(request, "Task created.")
