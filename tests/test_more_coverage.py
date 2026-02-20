@@ -178,3 +178,24 @@ class TestCoverageBoost:
         _attach_messages(req_dup)
         resp_dup = signup_view(req_dup)
         assert resp_dup.status_code == 200
+
+    def test_signup_view_rejects_invalid_email(self, db):
+        rf = RequestFactory()
+
+        middleware = SessionMiddleware(lambda r: None)
+
+        req = rf.post(
+            "/signup/",
+            data={
+                "email": "not-an-email",
+                "password": "testpass123",
+                "organization_name": "Org",
+            },
+        )
+        req.user = type("Anon", (), {"is_authenticated": False})()
+        middleware.process_request(req)
+        req.session.save()
+        req._messages = FallbackStorage(req)
+
+        resp = signup_view(req)
+        assert resp.status_code == 200

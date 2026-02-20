@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import connection
 from django.shortcuts import redirect, render
 from rest_framework.permissions import AllowAny
@@ -51,6 +53,12 @@ def signup_view(request):
             messages.error(
                 request, "Email, password, and organization name are required."
             )
+            return render(request, "public/signup.html")
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            messages.error(request, "Please enter a valid email address.")
             return render(request, "public/signup.html")
 
         if User.objects.filter(email=email).exists():

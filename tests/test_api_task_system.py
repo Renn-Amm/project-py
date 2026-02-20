@@ -8,6 +8,20 @@ from apps.tasks.models import Task, TaskStatus
 
 @pytest.mark.django_db
 class TestTaskSystemAPI:
+    def test_register_rejects_invalid_email(self, api_client):
+        resp = api_client.post(
+            "/api/auth/register/",
+            {
+                "email": "not-an-email",
+                "password": "verystrongpass",
+                "first_name": "X",
+                "last_name": "Y",
+                "organization_name": "Org",
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
     def test_register_login_and_profile(self, api_client):
         resp = api_client.post(
             "/api/auth/register/",

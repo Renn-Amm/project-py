@@ -43,6 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=10)
     organization_name = serializers.CharField(write_only=True, max_length=255)
 
@@ -57,6 +58,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "organization_name",
         ]
         read_only_fields = ["id"]
+
+    def validate_email(self, value):
+        return value.strip().lower()
 
     def create(self, validated_data):
         password = validated_data.pop("password")
