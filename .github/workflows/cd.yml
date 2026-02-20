@@ -64,7 +64,7 @@ jobs:
 
       - name: Deploy via SSH (optional)
         if: ${{ env.SSH_HOST != '' }}
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
