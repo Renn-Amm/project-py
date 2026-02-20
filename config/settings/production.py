@@ -8,6 +8,17 @@ from config.settings.base import *  # noqa: F401, F403
 
 DEBUG = False
 
+# WhiteNoise for static files — insert after SecurityMiddleware
+MIDDLEWARE.insert(  # noqa: F405
+    MIDDLEWARE.index("django.middleware.security.SecurityMiddleware") + 1,  # noqa: F405
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+)
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 SECRET_KEY = os.environ["SECRET_KEY"]
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
