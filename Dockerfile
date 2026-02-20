@@ -20,6 +20,7 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_ENV=production
+ENV DJANGO_SETTINGS_MODULE=config.settings
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 postgresql-client && \
@@ -33,7 +34,10 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 COPY . .
 
-# Collect static files (whitenoise needs this)
+# Make entrypoint executable
+RUN chmod +x entrypoint.sh
+
+# Collect static files (whitenoise needs this at build time)
 RUN SECRET_KEY=build-placeholder python manage.py collectstatic --noinput
 
 RUN chown -R appuser:appuser /app
@@ -41,14 +45,7 @@ USER appuser
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT:-8000}/api/health/')" || exit 1
 
-CMD gunicorn config.wsgi:application \
-     --bind "0.0.0.0:${PORT:-8000}" \
-     --workers 2 \
-     --worker-class gthread \
-     --threads 2 \
-     --timeout 30 \
-     --access-logfile - \
-     --error-logfile -
+ENTRYPOINT ["./entrypoint.sh"]
