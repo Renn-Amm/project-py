@@ -54,11 +54,12 @@ TaskFlow is a multi-tenant team task and performance management system built wit
 
 ## Tech Stack
 
-- **Backend:** Python 3.12 + Django 4.2 LTS + Django REST Framework
+- **Backend:** Python 3.11 + Django 4.2 LTS + Django REST Framework
 - **Frontend:** Server-rendered templates, Tailwind CSS (CDN), Alpine.js, HTMX
 - **Database:** PostgreSQL via `DATABASE_URL`
+- **Static Files:** WhiteNoise (compressed + cache-busted)
 - **Server:** Gunicorn (production)
-- **Infrastructure:** Docker + docker-compose
+- **Infrastructure:** Docker + docker-compose, Render (free tier)
 - **Quality:** ruff, mypy, pre-commit, pytest (≥80% coverage)
 - **CI/CD:** GitHub Actions (lint, typecheck, migrations check, tests, coverage, pip-audit)
 
@@ -95,6 +96,8 @@ TaskFlow is a multi-tenant team task and performance management system built wit
 ├── requirements/
 │   ├── prod.in / prod.txt
 │   └── dev.in / dev.txt
+├── render.yaml             # Render blueprint
+├── build.sh                # Render build script
 └── .github/
     └── workflows/
         ├── ci.yml
@@ -193,10 +196,14 @@ pip-compile --upgrade requirements/dev.in --generate-hashes -o requirements/dev.
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `SECRET_KEY` | Production | Django secret key |
-| `ALLOWED_HOSTS` | Production | Comma-separated hosts |
+| `ALLOWED_HOSTS` | Production | Comma-separated hosts (e.g. `.onrender.com`) |
 | `DATABASE_URL` | Always | PostgreSQL connection string |
 | `DJANGO_ENV` | Optional | development / production / test |
+| `DJANGO_SETTINGS_MODULE` | Optional | `config.settings` (default) |
+| `PYTHON_VERSION` | Render | `3.11.14` |
 | `CORS_ALLOWED_ORIGINS` | Optional | CORS whitelist |
+| `REDIS_URL` | Optional | Redis URL (falls back to in-memory cache) |
+| `DB_SSLMODE` | Optional | e.g. `require` for SSL-enabled Postgres |
 
 ## Quality and Checks
 
@@ -226,6 +233,24 @@ pre-commit run --all-files
 - pip-audit (`--strict`)
 - Docker build
 
-## Deployment
+## Render Deployment (Free Tier)
 
-Production runs behind Gunicorn. Define environment variables in your platform instead of local `.env` files.
+### Option A: Blueprint (recommended)
+1. Push to GitHub
+2. Render → **New → Blueprint** → connect repo → it reads `render.yaml`
+3. Wait ~3-5 min for build
+
+### Option B: Manual
+1. Create **Postgres** (free plan) on Render
+2. Create **Web Service** → connect repo
+3. Set Build Command: `./build.sh`
+4. Set Start Command: `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT`
+5. Add env vars (see table below)
+
+### After deploy
+```bash
+# Via Render Shell tab:
+python manage.py createsuperuser
+```
+
+Production runs behind Gunicorn with WhiteNoise for static files.

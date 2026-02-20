@@ -2,7 +2,7 @@ import pytest
 from datetime import date, timedelta
 from django.core.exceptions import ValidationError
 
-from apps.projects.models import Sprint, Project, ProjectMember
+from apps.projects.models import Sprint
 from apps.tasks.models import Task, TaskStatus
 from apps.tasks.services import SprintAutoCloseService, TaskWorkflowService
 

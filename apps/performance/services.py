@@ -2,9 +2,6 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from django.db.models import Avg, Count, Q
-from django.utils import timezone
-
 from apps.tasks.models import PRIORITY_WEIGHTS, Task, TaskStatus, TaskStatusChange
 
 

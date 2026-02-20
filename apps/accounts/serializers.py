@@ -150,8 +150,8 @@ class InvitationAcceptSerializer(serializers.Serializer):
     def validate_token(self, value):
         try:
             invitation = Invitation.objects.select_related("organization").get(token=value)
-        except Invitation.DoesNotExist:
-            raise serializers.ValidationError("Invalid invitation token.")
+        except Invitation.DoesNotExist as err:
+            raise serializers.ValidationError("Invalid invitation token.") from err
 
         if not invitation.is_valid:
             if invitation.is_used:

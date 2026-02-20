@@ -6,7 +6,7 @@ from django.utils import timezone
 from rest_framework import status
 
 from apps.accounts.models import User
-from apps.projects.models import Project, ProjectMember, Sprint
+from apps.projects.models import Sprint
 from apps.tasks.models import Task, TaskStatus
 from apps.tasks.services import TaskWorkflowService
 from apps.time_tracking.services import TimeEntryService

@@ -38,7 +38,7 @@ class TestPerformanceScore:
         assert metrics["weighted_score"] > 0
 
     def test_overdue_affects_score(self, project_with_team, developer_user, owner_user, organization):
-        task = Task.objects.create(
+        _task = Task.objects.create(
             project=project_with_team,
             title="Overdue Task",
             assignee=developer_user,
