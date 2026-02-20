@@ -1,4 +1,4 @@
-from apps.audit.models import AuditLog
+from apps.audit.models import ActivityEntry, AuditLog
 
 
 class AuditService:
@@ -48,4 +48,27 @@ class AuditService:
         return AuditLog.objects.filter(
             object_type=object_type,
             object_id=str(object_id),
+        )
+
+
+class ActivityFeedService:
+    """Append-only activity feed. Entries are never updated or deleted."""
+
+    @staticmethod
+    def record(
+        *,
+        organization,
+        actor,
+        activity_type: str,
+        description: str,
+        task=None,
+        metadata=None,
+    ) -> ActivityEntry:
+        return ActivityEntry.objects.create(
+            organization=organization,
+            actor=actor,
+            activity_type=activity_type,
+            task=task,
+            description=description,
+            metadata=metadata or {},
         )

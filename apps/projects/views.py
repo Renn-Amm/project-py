@@ -4,14 +4,41 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.accounts.models import UserRole
-from apps.projects.models import Project, ProjectMember
-from apps.projects.serializers import ProjectMemberSerializer, ProjectSerializer
+from apps.projects.models import Project, ProjectMember, Sprint
+from apps.projects.serializers import ProjectMemberSerializer, ProjectSerializer, SprintSerializer
 
 
 def _require_org(request):
     if not request.user.is_authenticated:
         return None
     return request.user.organization
+
+
+class SprintViewSet(viewsets.ModelViewSet):
+    serializer_class = SprintSerializer
+
+    def get_queryset(self):
+        org = _require_org(self.request)
+        if not org:
+            return Sprint.objects.none()
+        return Sprint.objects.filter(
+            project__organization=org,
+            project__memberships__user=self.request.user,
+        ).select_related("project").distinct()
+
+    def create(self, request, *args, **kwargs):
+        org = _require_org(request)
+        project_id = request.data.get("project")
+        project = get_object_or_404(
+            Project,
+            pk=project_id,
+            organization=org,
+            memberships__user=request.user,
+        )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(project=project)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):

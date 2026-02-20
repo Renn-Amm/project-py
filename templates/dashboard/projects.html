@@ -1,38 +1,75 @@
 {% extends "base.html" %}
-{% block title %}Projects{% endblock %}
+{% block title %}Projects — TaskFlow{% endblock %}
+{% block page_title %}Projects{% endblock %}
 
 {% block content %}
-<div class="flex items-start justify-between gap-4 mb-6">
-    <div>
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Projects</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Projects you are a member of</p>
-    </div>
+<div class="fade-up">
+    <div class="flex items-start justify-between gap-4 mb-8">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Your Projects</h2>
+            <p class="text-sm text-gray-500 dark:text-white/40 mt-1">Projects you are a member of</p>
+        </div>
 
-    {% if user.role == 'owner' or user.role == 'project_manager' %}
-    <form method="post" action="{% url 'dashboard_project_create' %}" class="flex items-center gap-2">
-        {% csrf_token %}
-        <input name="name" placeholder="Project name" class="w-56 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm" required />
-        <input name="description" placeholder="Description" class="w-72 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm" />
-        <button class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">Create</button>
-    </form>
-    {% endif %}
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-    {% for project in projects %}
-    <a href="{% url 'dashboard_project_detail' pk=project.id %}" class="block rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 hover:shadow-md transition-shadow">
-        <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ project.name }}</div>
-        {% if project.description %}
-        <div class="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ project.description }}</div>
-        {% else %}
-        <div class="mt-1 text-sm text-gray-400">No description</div>
+        {% if user.role == 'owner' or user.role == 'project_manager' %}
+        <form method="post" action="{% url 'dashboard_project_create' %}" class="flex items-center gap-2">
+            {% csrf_token %}
+            <input name="name" placeholder="Project name"
+                class="w-48 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all"
+                required />
+            <input name="description" placeholder="Description (optional)"
+                class="w-64 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all" />
+            <button
+                class="rounded-xl bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand/20 hover:shadow-brand/30 hover:scale-[1.02] transition-all">
+                <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Create
+                </span>
+            </button>
+        </form>
         {% endif %}
-        <div class="mt-3 text-xs text-gray-500 dark:text-gray-400">Created by {{ project.created_by.email }}</div>
-    </a>
-    {% empty %}
-    <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 text-center text-sm text-gray-500 dark:text-gray-400">
-        No projects yet.
     </div>
-    {% endfor %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {% for project in projects %}
+        <a href="{% url 'dashboard_project_detail' pk=project.id %}"
+            class="group block rounded-2xl border border-gray-200/60 dark:border-white/[.06] bg-white dark:bg-white/[.02] p-6 card-hover">
+            <div class="flex items-start justify-between">
+                <div class="w-10 h-10 rounded-xl bg-brand/10 dark:bg-brand/15 flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-brand dark:text-brand-light" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                </div>
+                <svg class="w-5 h-5 text-gray-300 dark:text-white/20 group-hover:text-brand dark:group-hover:text-brand-light transition-colors"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+            <div
+                class="text-base font-semibold text-gray-900 dark:text-white group-hover:text-brand dark:group-hover:text-brand-light transition-colors">
+                {{ project.name }}</div>
+            {% if project.description %}
+            <div class="mt-1.5 text-sm text-gray-500 dark:text-white/40 line-clamp-2">{{ project.description }}</div>
+            {% else %}
+            <div class="mt-1.5 text-sm text-gray-400 dark:text-white/25 italic">No description</div>
+            {% endif %}
+            <div class="mt-4 text-xs text-gray-400 dark:text-white/30">Created by {{ project.created_by.email }}</div>
+        </a>
+        {% empty %}
+        <div
+            class="md:col-span-2 xl:col-span-3 rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/[.01] p-12 text-center">
+            <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-white/15 mb-4" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+            </svg>
+            <div class="text-gray-500 dark:text-white/40 font-medium">No projects yet</div>
+            <div class="text-sm text-gray-400 dark:text-white/25 mt-1">Create your first project to get started</div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

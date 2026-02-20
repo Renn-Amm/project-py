@@ -1,0 +1,723 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0
+django: version: 4.2.28, settings: config.settings (from env)
+rootdir: /app
+configfile: pytest.ini
+plugins: cov-7.0.0, django-4.12.0
+collected 76 items
+
+tests/test_api_task_system.py ...F                                       [  5%]
+tests/test_dashboard_pages.py .F                                         [  7%]
+tests/test_dependencies.py FFFFFFFFF                                     [ 19%]
+tests/test_integration_flows.py F..FF                                    [ 26%]
+tests/test_invitations.py .........                                      [ 38%]
+tests/test_more_coverage.py ....FF....                                   [ 51%]
+tests/test_notifications.py FFFFFFFF                                     [ 61%]
+tests/test_overdue_job.py FFF                                            [ 65%]
+tests/test_performance_score.py .FFF....                                 [ 76%]
+tests/test_security.py FF...FFF.FF..                                     [ 93%]
+tests/test_sprints.py FFFFF
+ERROR: Coverage failure: total of 68 is less than fail-under=80
+                                                                         [100%]
+
+=================================== FAILURES ===================================
+E   assert 500 == 201
+     +  where 500 = <Response status_code=500, "application/json">.status_code
+     +  and   201 = status.HTTP_201_CREATED
+----------------------------- Captured stderr call -----------------------------
+[2026-02-20 10:53:54,134] ERROR apps.core.exception_handler exception_handler:31 Unhandled exception in <apps.tasks.views.TaskViewSet object at 0x7c25bb761ed0>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "/app/apps/tasks/views.py", line 47, in perform_create
+    serializer.save(project=project, created_by=self.request.user)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 660, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1810, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                             ^
+
+[2026-02-20 10:53:54,160] ERROR django.request log:246 Internal Server Error: /api/tasks/
+/app/tests/test_api_task_system.py:96: assert 500 == 201
+E   psycopg2.errors.UndefinedColumn: column tasks_task.sprint_id does not exist
+    LINE 1: ..., "tasks_task"."priority", "tasks_task"."status", "tasks_tas...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column tasks_task.sprint_id does not exist
+    LINE 1: ..., "tasks_task"."priority", "tasks_task"."status", "tasks_tas...
+                                                                 ^
+----------------------------- Captured stderr call -----------------------------
+[2026-02-20 10:53:55,003] ERROR django.request log:246 Internal Server Error: /dashboard/projects/3/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column tasks_task.sprint_id does not exist
+LINE 1: ..., "tasks_task"."priority", "tasks_task"."status", "tasks_tas...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/apps/dashboard/task_views.py", line 227, in project_detail_view
+    for t in tasks:
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 400, in __iter__
+    self._fetch_all()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1886, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column tasks_task.sprint_id does not exist
+LINE 1: ..., "tasks_task"."priority", "tasks_task"."status", "tasks_tas...
+                                                             ^
+
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column tasks_task.sprint_id does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   assert 500 == 201
+     +  where 500 = <Response status_code=500, "application/json">.status_code
+     +  and   201 = status.HTTP_201_CREATED
+----------------------------- Captured stderr call -----------------------------
+[2026-02-20 10:54:06,862] ERROR apps.core.exception_handler exception_handler:31 Unhandled exception in <apps.tasks.views.TaskViewSet object at 0x7c25bbbaa510>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "/app/apps/tasks/views.py", line 47, in perform_create
+    serializer.save(project=project, created_by=self.request.user)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 660, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1810, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                             ^
+
+[2026-02-20 10:54:06,869] ERROR django.request log:246 Internal Server Error: /api/tasks/
+/app/tests/test_integration_flows.py:36: assert 500 == 201
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedTable: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedColumn: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+    LINE 1: ...d", "title", "description", "priority", "status", "sprint_id...
+                                                                 ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: column "sprint_id" of relation "tasks_task" does not exist
+E   psycopg2.errors.UndefinedTable: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+E   psycopg2.errors.UndefinedTable: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+E   psycopg2.errors.UndefinedTable: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+E   psycopg2.errors.UndefinedTable: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+E   psycopg2.errors.UndefinedTable: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+
+The above exception was the direct cause of the following exception:
+E   django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+    LINE 1: INSERT INTO "projects_sprint" ("project_id", "name", "goal",...
+                        ^
+/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py:89: django.db.utils.ProgrammingError: relation "projects_sprint" does not exist
+=============================== warnings summary ===============================
+tests/test_api_task_system.py::TestTaskSystemAPI::test_project_crud_and_membership_enforced
+tests/test_security.py::TestCrossTenantIsolation::test_other_org_cannot_list_projects
+  /usr/local/lib/python3.11/site-packages/rest_framework/pagination.py:207: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'apps.projects.models.Project'> QuerySet.
+    paginator = self.django_paginator_class(queryset, page_size)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.11.14-final-0 _______________
+
+Name                                                                                                 Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------------------------------------------------------------------------------
+apps/accounts/__init__.py                                                                                0      0      0      0   100%
+apps/accounts/admin.py                                                                                  11      0      0      0   100%
+apps/accounts/apps.py                                                                                    5      0      0      0   100%
+apps/accounts/migrations/0001_initial.py                                                                 6      0      0      0   100%
+apps/accounts/migrations/0002_remove_user_tenant_user_organization_alter_user_role.py                    4      0      0      0   100%
+apps/accounts/migrations/0003_invitation.py                                                              6      0      0      0   100%
+apps/accounts/migrations/__init__.py                                                                     0      0      0      0   100%
+apps/accounts/models.py                                                                                 72      7      2      1    89%   31, 39-42, 76, 115
+apps/accounts/permissions.py                                                                            21      2      2      1    87%   29, 47
+apps/accounts/serializers.py                                                                            90      0      8      0   100%
+apps/accounts/urls.py                                                                                    4      0      0      0   100%
+apps/accounts/views.py                                                                                  78     22     10      1    67%   26, 42-44, 51-61, 70-84, 142
+apps/audit/__init__.py                                                                                   0      0      0      0   100%
+apps/audit/admin.py                                                                                      9      0      0      0   100%
+apps/audit/apps.py                                                                                       5      0      0      0   100%
+apps/audit/middleware.py                                                                                81     22     36      9    68%   31, 41->56, 53-54, 61, 63, 65, 67, 69, 86-89, 100-101, 108, 118-124
+apps/audit/migrations/0001_initial.py                                                                    7      0      0      0   100%
+apps/audit/migrations/0002_rename_audit_audit_organiz_1c5c31_idx_audit_audit_organiz_155e59_idx.py       4      0      0      0   100%
+apps/audit/migrations/0003_activityentry.py                                                              6      0      0      0   100%
+apps/audit/migrations/__init__.py                                                                        0      0      0      0   100%
+apps/audit/models.py                                                                                    50      2      0      0    96%   49, 99
+apps/audit/serializers.py                                                                               14      0      0      0   100%
+apps/audit/services.py                                                                                  27      3     12      3    85%   33->44, 41, 43, 67
+apps/audit/urls.py                                                                                       3      0      0      0   100%
+apps/audit/views.py                                                                                     24      5      2      0    73%   25, 39-42
+apps/core/__init__.py                                                                                    0      0      0      0   100%
+apps/core/exception_handler.py                                                                          18      1      6      1    92%   19
+apps/core/views.py                                                                                      54      9      8      2    82%   29-31, 43, 68-80
+apps/notifications/__init__.py                                                                           0      0      0      0   100%
+apps/notifications/apps.py                                                                               4      0      0      0   100%
+apps/notifications/migrations/0001_initial.py                                                            7      0      0      0   100%
+apps/notifications/migrations/__init__.py                                                                0      0      0      0   100%
+apps/notifications/models.py                                                                            21      1      0      0    95%   48
+apps/notifications/serializers.py                                                                        7      0      0      0   100%
+apps/notifications/services.py                                                                          32     17     10      0    36%   10-12, 23-25, 36-38, 49-51, 62-64, 75-80
+apps/notifications/urls.py                                                                               3      0      0      0   100%
+apps/notifications/views.py                                                                             26     13      6      0    41%   14-17, 25-31, 36-44
+apps/organizations/__init__.py                                                                           0      0      0      0   100%
+apps/organizations/admin.py                                                                              7      0      0      0   100%
+apps/organizations/apps.py                                                                               5      0      0      0   100%
+apps/organizations/migrations/0001_initial.py                                                            5      0      0      0   100%
+apps/organizations/migrations/__init__.py                                                                0      0      0      0   100%
+apps/organizations/models.py                                                                            14      1      2      0    94%   21
+apps/organizations/urls.py                                                                               1      1      0      0     0%   1
+apps/performance/__init__.py                                                                             0      0      0      0   100%
+apps/performance/apps.py                                                                                 5      0      0      0   100%
+apps/performance/migrations/__init__.py                                                                  0      0      0      0   100%
+apps/performance/services.py                                                                            53     37     20      1    23%   41-113
+apps/performance/urls.py                                                                                 3      0      0      0   100%
+apps/performance/views.py                                                                               39      2      8      2    91%   20, 51
+apps/projects/__init__.py                                                                                0      0      0      0   100%
+apps/projects/admin.py                                                                                  13      0      0      0   100%
+apps/projects/apps.py                                                                                    5      0      0      0   100%
+apps/projects/migrations/0001_initial.py                                                                 7      0      0      0   100%
+apps/projects/migrations/__init__.py                                                                     0      0      0      0   100%
+apps/projects/models.py                                                                                 36      3      0      0    92%   31, 60, 77
+apps/projects/serializers.py                                                                            17      0      0      0   100%
+apps/projects/urls.py                                                                                    7      0      0      0   100%
+apps/projects/views.py                                                                                  62     26     18      5    51%   13, 21-24, 30-41, 50, 67, 70, 74, 86-102
+apps/tasks/__init__.py                                                                                   0      0      0      0   100%
+apps/tasks/admin.py                                                                                      8      0      0      0   100%
+apps/tasks/apps.py                                                                                       5      0      0      0   100%
+apps/tasks/management/__init__.py                                                                        0      0      0      0   100%
+apps/tasks/management/commands/__init__.py                                                               0      0      0      0   100%
+apps/tasks/management/commands/mark_overdue_tasks.py                                                    10     10      0      0     0%   1-20
+apps/tasks/migrations/0001_initial.py                                                                    8      0      0      0   100%
+apps/tasks/migrations/0002_task_review_approved_at_task_review_approved_by_and_more.py                   6      0      0      0   100%
+apps/tasks/migrations/__init__.py                                                                        0      0      0      0   100%
+apps/tasks/models.py                                                                                    74     14      8      0    73%   110, 114, 117-127, 169
+apps/tasks/serializers.py                                                                               19      0      0      0   100%
+apps/tasks/services.py                                                                                 139    101     70      0    18%   27-38, 43-60, 65-70, 81-136, 141-147, 152-159, 164-211, 219-235, 243-246
+apps/tasks/urls.py                                                                                       6      0      0      0   100%
+apps/tasks/views.py                                                                                     54     25      8      2    50%   21-24, 42->44, 44->47, 51-57, 61-63, 67-77, 81-84
+apps/time_tracking/__init__.py                                                                           0      0      0      0   100%
+apps/time_tracking/admin.py                                                                              8      0      0      0   100%
+apps/time_tracking/apps.py                                                                               5      0      0      0   100%
+apps/time_tracking/migrations/0001_initial.py                                                            8      0      0      0   100%
+apps/time_tracking/migrations/__init__.py                                                                0      0      0      0   100%
+apps/time_tracking/models.py                                                                            13      1      0      0    92%   21
+apps/time_tracking/serializers.py                                                                        7      0      0      0   100%
+apps/time_tracking/services.py                                                                          40     17      8      0    48%   22-23, 28-49, 54-62, 66-68
+apps/time_tracking/urls.py                                                                               6      0      0      0   100%
+apps/time_tracking/views.py                                                                             32     19      2      0    38%   15-18, 29-46, 49-51, 54-59
+------------------------------------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                                 1426    361    246     28    68%
+FAIL Required test coverage of 80% not reached. Total coverage: 67.88%
+=========================== short test summary info ============================
+FAILED tests/test_api_task_system.py::TestTaskSystemAPI::test_task_transition_rules_and_time_entries
+FAILED tests/test_dashboard_pages.py::TestDashboardPages::test_dashboard_login_and_projects_page
+FAILED tests/test_dependencies.py::TestDependencyCreation::test_add_dependency
+FAILED tests/test_dependencies.py::TestDependencyCreation::test_self_dependency_rejected
+FAILED tests/test_dependencies.py::TestDependencyCreation::test_duplicate_dependency_rejected
+FAILED tests/test_dependencies.py::TestDependencyCreation::test_remove_dependency
+FAILED tests/test_dependencies.py::TestCircularDependency::test_direct_circular_rejected
+FAILED tests/test_dependencies.py::TestCircularDependency::test_indirect_circular_rejected
+FAILED tests/test_dependencies.py::TestDependencyEnforcement::test_cannot_start_with_incomplete_dependency
+FAILED tests/test_dependencies.py::TestDependencyEnforcement::test_can_start_when_dependency_completed
+FAILED tests/test_dependencies.py::TestDependencyEnforcement::test_cross_project_dependency_rejected
+FAILED tests/test_integration_flows.py::TestFullTaskLifecycle::test_complete_lifecycle
+FAILED tests/test_integration_flows.py::TestMultiUserInteraction::test_developer_and_reviewer_collaboration
+FAILED tests/test_integration_flows.py::TestMultiUserInteraction::test_sprint_with_tasks_lifecycle
+FAILED tests/test_more_coverage.py::TestCoverageBoost::test_task_workflow_restrictions_and_archived_protection
+FAILED tests/test_more_coverage.py::TestCoverageBoost::test_time_entry_immutability
+FAILED tests/test_notifications.py::TestNotificationCreation::test_notify_task_assigned
+FAILED tests/test_notifications.py::TestNotificationCreation::test_notify_moved_to_review
+FAILED tests/test_notifications.py::TestNotificationCreation::test_notify_overdue
+FAILED tests/test_notifications.py::TestNotificationCreation::test_no_notification_without_assignee
+FAILED tests/test_notifications.py::TestNotificationTenantIsolation::test_notifications_scoped_to_org
+FAILED tests/test_notifications.py::TestNotificationTenantIsolation::test_mark_read_own_org_only
+FAILED tests/test_notifications.py::TestNotificationAPI::test_list_notifications
+FAILED tests/test_notifications.py::TestNotificationAPI::test_mark_read - dja...
+FAILED tests/test_overdue_job.py::TestOverdueJob::test_mark_overdue_marks_task_after_deadline
+FAILED tests/test_overdue_job.py::TestOverdueJob::test_mark_overdue_does_not_mark_completed_task
+FAILED tests/test_overdue_job.py::TestOverdueJob::test_overdue_is_cleared_on_completion
+FAILED tests/test_performance_score.py::TestPerformanceScore::test_completed_task_scoring
+FAILED tests/test_performance_score.py::TestPerformanceScore::test_overdue_affects_score
+FAILED tests/test_performance_score.py::TestPerformanceScore::test_multiple_tasks_scoring
+FAILED tests/test_security.py::TestCrossTenantIsolation::test_other_org_cannot_see_tasks
+FAILED tests/test_security.py::TestCrossTenantIsolation::test_other_org_cannot_list_tasks
+FAILED tests/test_security.py::TestCrossTenantIsolation::test_cross_org_transition_rejected
+FAILED tests/test_security.py::TestCrossTenantIsolation::test_notifications_leak_prevention
+FAILED tests/test_security.py::TestPrivilegeEscalation::test_viewer_cannot_transition
+FAILED tests/test_security.py::TestPrivilegeEscalation::test_developer_cannot_archive
+FAILED tests/test_security.py::TestPrivilegeEscalation::test_non_reviewer_cannot_approve
+FAILED tests/test_sprints.py::TestSprintModel::test_create_sprint - django.db...
+FAILED tests/test_sprints.py::TestSprintModel::test_sprint_unique_name_per_project
+FAILED tests/test_sprints.py::TestSprintAutoClose::test_auto_close_expired_sprints
+FAILED tests/test_sprints.py::TestSprintEnforcement::test_cannot_transition_in_closed_sprint
+FAILED tests/test_sprints.py::TestSprintEnforcement::test_can_transition_in_open_sprint
+============= 42 failed, 34 passed, 2 warnings in 65.47s (0:01:05) =============

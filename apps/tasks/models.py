@@ -8,7 +8,15 @@ class TaskPriority(models.TextChoices):
     LOW = "low", "Low"
     MEDIUM = "medium", "Medium"
     HIGH = "high", "High"
-    URGENT = "urgent", "Urgent"
+    CRITICAL = "critical", "Critical"
+
+
+PRIORITY_WEIGHTS = {
+    TaskPriority.LOW: 1,
+    TaskPriority.MEDIUM: 2,
+    TaskPriority.HIGH: 3,
+    TaskPriority.CRITICAL: 5,
+}
 
 
 class TaskStatus(models.TextChoices):
@@ -28,6 +36,14 @@ class Task(models.Model):
 
     priority = models.CharField(max_length=20, choices=TaskPriority.choices, default=TaskPriority.MEDIUM)
     status = models.CharField(max_length=20, choices=TaskStatus.choices, default=TaskStatus.BACKLOG)
+
+    sprint = models.ForeignKey(
+        "projects.Sprint",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tasks",
+    )
 
     assignee = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -87,6 +103,7 @@ class Task(models.Model):
             models.Index(fields=["project", "assignee"]),
             models.Index(fields=["project", "reviewer"]),
             models.Index(fields=["deadline", "status"]),
+            models.Index(fields=["sprint"]),
         ]
 
     def __str__(self) -> str:
@@ -128,3 +145,25 @@ class TaskStatusChange(models.Model):
             models.Index(fields=["task", "created_at"]),
             models.Index(fields=["to_status", "created_at"]),
         ]
+
+
+class TaskDependency(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="dependencies")
+    depends_on = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="dependents")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["task", "depends_on"], name="uniq_task_dependency"),
+            models.CheckConstraint(
+                check=~models.Q(task=models.F("depends_on")),
+                name="no_self_dependency",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["task"]),
+            models.Index(fields=["depends_on"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"Task {self.task_id} depends on {self.depends_on_id}"

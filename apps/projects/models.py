@@ -2,6 +2,35 @@ from django.conf import settings
 from django.db import models
 
 
+class Sprint(models.Model):
+    project = models.ForeignKey(
+        "projects.Project",
+        on_delete=models.CASCADE,
+        related_name="sprints",
+    )
+    name = models.CharField(max_length=255)
+    goal = models.TextField(blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_closed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["project", "name"], name="uniq_sprint_project_name"),
+            models.CheckConstraint(
+                check=models.Q(start_date__lt=models.F("end_date")),
+                name="sprint_start_before_end",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["project", "is_closed"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.project_id})"
+
+
 class Project(models.Model):
     organization = models.ForeignKey(
         "organizations.Organization",

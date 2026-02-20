@@ -1,9 +1,15 @@
 from django.urls import path
 
 from apps.dashboard.task_views import (
+    activity_feed_view,
     audit_view,
     analytics_view,
     dashboard_home,
+    invitation_create_view,
+    invitation_list_view,
+    notification_list_view,
+    notification_mark_read_view,
+    notifications_mark_all_read_view,
     performance_view,
     project_add_member_view,
     project_create_view,
@@ -26,6 +32,22 @@ urlpatterns = [
     path("analytics/", analytics_view, name="dashboard_analytics"),
     path("audit/", audit_view, name="dashboard_audit"),
     path("performance/", performance_view, name="dashboard_performance"),
+    path("activity/", activity_feed_view, name="dashboard_activity"),
+    # Invitations
+    path("invitations/", invitation_list_view, name="dashboard_invitations"),
+    path("invitations/create/", invitation_create_view, name="dashboard_invitation_create"),
+    # Notifications
+    path("notifications/", notification_list_view, name="dashboard_notifications"),
+    path(
+        "notifications/<int:pk>/read/",
+        notification_mark_read_view,
+        name="dashboard_notification_mark_read",
+    ),
+    path(
+        "notifications/read-all/",
+        notifications_mark_all_read_view,
+        name="dashboard_notifications_mark_all_read",
+    ),
     # Projects
     path("projects/", project_list_view, name="dashboard_projects"),
     path("projects/create/", project_create_view, name="dashboard_project_create"),

@@ -7,12 +7,67 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.accounts.models import UserRole
-from apps.tasks.models import Task, TaskStatus, TaskStatusChange
+from apps.audit.models import ActivityType
+from apps.audit.services import ActivityFeedService
+from apps.notifications.services import NotificationService
+from apps.tasks.models import Task, TaskDependency, TaskStatus, TaskStatusChange
 
 
 @dataclass(frozen=True)
 class TransitionResult:
     task: Task
+
+
+class DependencyService:
+    """Manages task dependencies with circular-detection."""
+
+    @staticmethod
+    def _has_path(start_id: int, target_id: int, visited: set[int] | None = None) -> bool:
+        """DFS to detect if there is a path from start to target through dependencies."""
+        if visited is None:
+            visited = set()
+        if start_id == target_id:
+            return True
+        if start_id in visited:
+            return False
+        visited.add(start_id)
+        deps = TaskDependency.objects.filter(task_id=start_id).values_list("depends_on_id", flat=True)
+        for dep_id in deps:
+            if DependencyService._has_path(dep_id, target_id, visited):
+                return True
+        return False
+
+    @staticmethod
+    @transaction.atomic
+    def add_dependency(*, task: Task, depends_on: Task, actor) -> TaskDependency:
+        if task.pk == depends_on.pk:
+            raise ValidationError("A task cannot depend on itself.")
+
+        if task.project_id != depends_on.project_id:
+            raise ValidationError("Dependencies must be within the same project.")
+
+        if actor.organization_id != task.organization_id:
+            raise ValidationError("Cross-organization access is not allowed.")
+
+        # Circular dependency check: would adding depends_on→task create a cycle?
+        if DependencyService._has_path(depends_on.pk, task.pk):
+            raise ValidationError("This would create a circular dependency.")
+
+        dep, created = TaskDependency.objects.get_or_create(task=task, depends_on=depends_on)
+        if not created:
+            raise ValidationError("This dependency already exists.")
+
+        return dep
+
+    @staticmethod
+    @transaction.atomic
+    def remove_dependency(*, task: Task, depends_on: Task, actor) -> None:
+        if actor.organization_id != task.organization_id:
+            raise ValidationError("Cross-organization access is not allowed.")
+
+        deleted, _ = TaskDependency.objects.filter(task=task, depends_on=depends_on).delete()
+        if not deleted:
+            raise ValidationError("Dependency not found.")
 
 
 class TaskWorkflowService:
@@ -37,6 +92,12 @@ class TaskWorkflowService:
 
         # Owner override: can perform any transition (except archived protection above)
         if actor.role == UserRole.OWNER:
+            # Even owner must pass dependency check for IN_PROGRESS
+            if to_status == TaskStatus.IN_PROGRESS:
+                TaskWorkflowService._check_dependencies(task)
+            # Even owner must pass sprint check
+            if task.sprint_id:
+                TaskWorkflowService._check_sprint(task)
             return
 
         # Role restricted transitions (mandatory rules)
@@ -65,6 +126,37 @@ class TaskWorkflowService:
             has_in_review = TaskStatusChange.objects.filter(task=task, to_status=TaskStatus.IN_REVIEW).exists()
             if not has_in_review and from_status != TaskStatus.IN_REVIEW:
                 raise ValidationError("Task must be in 'In Review' before it can be completed.")
+
+        # Dependency enforcement: cannot move to IN_PROGRESS with incomplete deps
+        if to_status == TaskStatus.IN_PROGRESS:
+            TaskWorkflowService._check_dependencies(task)
+
+        # Sprint enforcement
+        if task.sprint_id:
+            TaskWorkflowService._check_sprint(task)
+
+    @staticmethod
+    def _check_dependencies(task: Task) -> None:
+        """Cannot start a task if any dependency is not completed."""
+        incomplete_deps = TaskDependency.objects.filter(
+            task=task,
+        ).exclude(
+            depends_on__status=TaskStatus.COMPLETED,
+        )
+        if incomplete_deps.exists():
+            raise ValidationError("Cannot start task: some dependencies are not completed.")
+
+    @staticmethod
+    def _check_sprint(task: Task) -> None:
+        """Cannot move a task in a closed sprint."""
+        from apps.projects.models import Sprint
+
+        try:
+            sprint = Sprint.objects.get(pk=task.sprint_id)
+        except Sprint.DoesNotExist:
+            return
+        if sprint.is_closed:
+            raise ValidationError("Cannot change task status in a closed sprint.")
 
     @staticmethod
     @transaction.atomic
@@ -100,6 +192,22 @@ class TaskWorkflowService:
             actor=actor,
         )
 
+        # Activity feed
+        ActivityFeedService.record(
+            organization=locked.project.organization,
+            actor=actor,
+            activity_type=ActivityType.STATUS_CHANGE,
+            task=locked,
+            description=f"Status changed from {from_status} to {to_status}",
+            metadata={"from_status": from_status, "to_status": to_status},
+        )
+
+        # Notifications
+        if to_status == TaskStatus.IN_REVIEW:
+            NotificationService.notify_moved_to_review(task=locked)
+        if from_status == TaskStatus.IN_REVIEW and to_status == TaskStatus.BACKLOG:
+            NotificationService.notify_review_rejected(task=locked, actor=actor)
+
         return TransitionResult(task=locked)
 
 
@@ -122,5 +230,20 @@ class OverdueDetectionService:
         for task in candidates:
             if task.mark_overdue_if_needed():
                 task.save(update_fields=["is_overdue", "overdue_marked_at", "updated_at"])
+                NotificationService.notify_overdue(task=task)
                 updated += 1
         return updated
+
+
+class SprintAutoCloseService:
+    """Closes sprints that have passed their end date."""
+
+    @staticmethod
+    def close_expired_sprints() -> int:
+        from apps.projects.models import Sprint
+
+        today = timezone.now().date()
+        return Sprint.objects.filter(
+            is_closed=False,
+            end_date__lt=today,
+        ).update(is_closed=True)

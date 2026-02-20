@@ -1,0 +1,125 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0
+django: version: 4.2.28, settings: config.settings (from env)
+rootdir: /app
+configfile: pytest.ini
+plugins: cov-7.0.0, django-4.12.0
+collected 76 items
+
+tests/test_api_task_system.py ....                                       [  5%]
+tests/test_dashboard_pages.py ..                                         [  7%]
+tests/test_dependencies.py .........                                     [ 19%]
+tests/test_integration_flows.py .....                                    [ 26%]
+tests/test_invitations.py .........                                      [ 38%]
+tests/test_more_coverage.py ..........                                   [ 51%]
+tests/test_notifications.py ........                                     [ 61%]
+tests/test_overdue_job.py ...                                            [ 65%]
+tests/test_performance_score.py ........                                 [ 76%]
+tests/test_security.py .............                                     [ 93%]
+tests/test_sprints.py .....                                              [100%]
+
+=============================== warnings summary ===============================
+tests/test_api_task_system.py::TestTaskSystemAPI::test_project_crud_and_membership_enforced
+tests/test_security.py::TestCrossTenantIsolation::test_other_org_cannot_list_projects
+  /usr/local/lib/python3.11/site-packages/rest_framework/pagination.py:207: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'apps.projects.models.Project'> QuerySet.
+    paginator = self.django_paginator_class(queryset, page_size)
+
+tests/test_security.py::TestCrossTenantIsolation::test_other_org_cannot_list_tasks
+  /usr/local/lib/python3.11/site-packages/rest_framework/pagination.py:207: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'apps.tasks.models.Task'> QuerySet.
+    paginator = self.django_paginator_class(queryset, page_size)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.11.14-final-0 _______________
+
+Name                                                                                                 Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------------------------------------------------------------------------------
+apps/accounts/__init__.py                                                                                0      0      0      0   100%
+apps/accounts/admin.py                                                                                  11      0      0      0   100%
+apps/accounts/apps.py                                                                                    5      0      0      0   100%
+apps/accounts/migrations/0001_initial.py                                                                 6      0      0      0   100%
+apps/accounts/migrations/0002_remove_user_tenant_user_organization_alter_user_role.py                    4      0      0      0   100%
+apps/accounts/migrations/0003_invitation.py                                                              6      0      0      0   100%
+apps/accounts/migrations/__init__.py                                                                     0      0      0      0   100%
+apps/accounts/models.py                                                                                 72      7      2      1    89%   31, 39-42, 76, 115
+apps/accounts/permissions.py                                                                            21      2      2      1    87%   29, 47
+apps/accounts/serializers.py                                                                            90      0      8      0   100%
+apps/accounts/urls.py                                                                                    4      0      0      0   100%
+apps/accounts/views.py                                                                                  78     22     10      1    67%   26, 42-44, 51-61, 70-84, 142
+apps/audit/__init__.py                                                                                   0      0      0      0   100%
+apps/audit/admin.py                                                                                      9      0      0      0   100%
+apps/audit/apps.py                                                                                       5      0      0      0   100%
+apps/audit/middleware.py                                                                                81     19     36     10    74%   31, 34, 41->56, 53-54, 61, 63, 65, 67, 69, 88->91, 100-101, 108, 118-124
+apps/audit/migrations/0001_initial.py                                                                    7      0      0      0   100%
+apps/audit/migrations/0002_rename_audit_audit_organiz_1c5c31_idx_audit_audit_organiz_155e59_idx.py       4      0      0      0   100%
+apps/audit/migrations/0003_activityentry.py                                                              6      0      0      0   100%
+apps/audit/migrations/__init__.py                                                                        0      0      0      0   100%
+apps/audit/models.py                                                                                    50      2      0      0    96%   49, 99
+apps/audit/serializers.py                                                                               14      0      0      0   100%
+apps/audit/services.py                                                                                  27      2     12      3    87%   33->44, 41, 43
+apps/audit/urls.py                                                                                       3      0      0      0   100%
+apps/audit/views.py                                                                                     24      5      2      0    73%   25, 39-42
+apps/core/__init__.py                                                                                    0      0      0      0   100%
+apps/core/exception_handler.py                                                                          18      1      6      1    92%   19
+apps/core/views.py                                                                                      54      9      8      2    82%   29-31, 43, 68-80
+apps/notifications/__init__.py                                                                           0      0      0      0   100%
+apps/notifications/apps.py                                                                               4      0      0      0   100%
+apps/notifications/migrations/0001_initial.py                                                            7      0      0      0   100%
+apps/notifications/migrations/__init__.py                                                                0      0      0      0   100%
+apps/notifications/models.py                                                                            21      1      0      0    95%   48
+apps/notifications/serializers.py                                                                        7      0      0      0   100%
+apps/notifications/services.py                                                                          32      5     10      2    79%   11, 37, 49-51
+apps/notifications/urls.py                                                                               3      0      0      0   100%
+apps/notifications/views.py                                                                             26      7      6      2    66%   16, 27, 36-44
+apps/organizations/__init__.py                                                                           0      0      0      0   100%
+apps/organizations/admin.py                                                                              7      0      0      0   100%
+apps/organizations/apps.py                                                                               5      0      0      0   100%
+apps/organizations/migrations/0001_initial.py                                                            5      0      0      0   100%
+apps/organizations/migrations/__init__.py                                                                0      0      0      0   100%
+apps/organizations/models.py                                                                            14      1      2      0    94%   21
+apps/organizations/urls.py                                                                               1      1      0      0     0%   1
+apps/performance/__init__.py                                                                             0      0      0      0   100%
+apps/performance/apps.py                                                                                 5      0      0      0   100%
+apps/performance/migrations/__init__.py                                                                  0      0      0      0   100%
+apps/performance/services.py                                                                            53      5     20      4    88%   73->72, 77->81, 91-95, 97
+apps/performance/urls.py                                                                                 3      0      0      0   100%
+apps/performance/views.py                                                                               39      2      8      2    91%   20, 51
+apps/projects/__init__.py                                                                                0      0      0      0   100%
+apps/projects/admin.py                                                                                  13      0      0      0   100%
+apps/projects/apps.py                                                                                    5      0      0      0   100%
+apps/projects/migrations/0001_initial.py                                                                 7      0      0      0   100%
+apps/projects/migrations/0002_sprint.py                                                                  5      0      0      0   100%
+apps/projects/migrations/__init__.py                                                                     0      0      0      0   100%
+apps/projects/models.py                                                                                 36      3      0      0    92%   31, 60, 77
+apps/projects/serializers.py                                                                            17      0      0      0   100%
+apps/projects/urls.py                                                                                    7      0      0      0   100%
+apps/projects/views.py                                                                                  62     26     18      5    51%   13, 21-24, 30-41, 50, 67, 70, 74, 86-102
+apps/tasks/__init__.py                                                                                   0      0      0      0   100%
+apps/tasks/admin.py                                                                                      8      0      0      0   100%
+apps/tasks/apps.py                                                                                       5      0      0      0   100%
+apps/tasks/management/__init__.py                                                                        0      0      0      0   100%
+apps/tasks/management/commands/__init__.py                                                               0      0      0      0   100%
+apps/tasks/management/commands/mark_overdue_tasks.py                                                    10      0      0      0   100%
+apps/tasks/migrations/0001_initial.py                                                                    8      0      0      0   100%
+apps/tasks/migrations/0002_task_review_approved_at_task_review_approved_by_and_more.py                   6      0      0      0   100%
+apps/tasks/migrations/0003_task_sprint_taskdependency.py                                                 5      0      0      0   100%
+apps/tasks/migrations/__init__.py                                                                        0      0      0      0   100%
+apps/tasks/models.py                                                                                    74      6      8      4    88%   110, 118, 120, 122, 124, 169
+apps/tasks/serializers.py                                                                               19      0      0      0   100%
+apps/tasks/services.py                                                                                 139     13     70      8    88%   32, 50, 66, 70, 123-128, 156-157, 209, 221, 231->230
+apps/tasks/urls.py                                                                                       6      0      0      0   100%
+apps/tasks/views.py                                                                                     54     13      8      3    71%   23, 42->44, 44->47, 67-77, 81-84
+apps/time_tracking/__init__.py                                                                           0      0      0      0   100%
+apps/time_tracking/admin.py                                                                              8      0      0      0   100%
+apps/time_tracking/apps.py                                                                               5      0      0      0   100%
+apps/time_tracking/migrations/0001_initial.py                                                            8      0      0      0   100%
+apps/time_tracking/migrations/__init__.py                                                                0      0      0      0   100%
+apps/time_tracking/models.py                                                                            13      1      0      0    92%   21
+apps/time_tracking/serializers.py                                                                        7      0      0      0   100%
+apps/time_tracking/services.py                                                                          40      3      8      3    88%   23, 29, 32
+apps/time_tracking/urls.py                                                                               6      0      0      0   100%
+apps/time_tracking/views.py                                                                             32     13      2      0    56%   15-18, 49-51, 54-59
+------------------------------------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                                 1436    169    246     52    85%
+Required test coverage of 80% reached. Total coverage: 85.08%
+======================= 76 passed, 3 warnings in 54.09s ========================

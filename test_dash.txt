@@ -1,0 +1,332 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python
+cachedir: .pytest_cache
+django: version: 4.2.28, settings: config.settings (from env)
+rootdir: /app
+configfile: pytest.ini
+plugins: cov-7.0.0, django-4.12.0
+collecting ... collected 2 items
+
+tests/test_dashboard_pages.py::TestDashboardPages::test_public_pages_load PASSED [ 50%]
+tests/test_dashboard_pages.py::TestDashboardPages::test_dashboard_login_and_projects_page FAILED [100%]
+ERROR: Coverage failure: total of 51 is less than fail-under=80
+
+
+=================================== FAILURES ===================================
+__________ TestDashboardPages.test_dashboard_login_and_projects_page ___________
+/usr/local/lib/python3.11/site-packages/django/template/base.py:505: in parse
+    compile_func = self.tags[command]
+                   ^^^^^^^^^^^^^^^^^^
+E   KeyError: 'empty'
+
+During handling of the above exception, another exception occurred:
+tests/test_dashboard_pages.py:18: in test_dashboard_login_and_projects_page
+    assert c.get(f"/dashboard/projects/{project.id}/").status_code == 200
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/test/client.py:927: in get
+    response = super().get(path, data=data, secure=secure, headers=headers, **extra)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/test/client.py:457: in get
+    return self.generic(
+/usr/local/lib/python3.11/site-packages/django/test/client.py:609: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/test/client.py:891: in request
+    self.check_exception(response)
+/usr/local/lib/python3.11/site-packages/django/test/client.py:738: in check_exception
+    raise exc_value
+/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py:197: in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/contrib/auth/decorators.py:23: in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/dashboard/task_views.py:235: in project_detail_view
+    return render(
+/usr/local/lib/python3.11/site-packages/django/shortcuts.py:24: in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/loader.py:61: in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/loader.py:15: in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/backends/django.py:33: in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/engine.py:175: in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/engine.py:157: in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/loaders/cached.py:57: in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/loaders/base.py:28: in get_template
+    return Template(
+/usr/local/lib/python3.11/site-packages/django/template/base.py:154: in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/base.py:200: in compile_nodelist
+    return parser.parse()
+           ^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/base.py:513: in parse
+    raise self.error(token, e)
+/usr/local/lib/python3.11/site-packages/django/template/base.py:511: in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/loader_tags.py:293: in do_extends
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/base.py:513: in parse
+    raise self.error(token, e)
+/usr/local/lib/python3.11/site-packages/django/template/base.py:511: in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/loader_tags.py:232: in do_block
+    nodelist = parser.parse(("endblock",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/base.py:513: in parse
+    raise self.error(token, e)
+/usr/local/lib/python3.11/site-packages/django/template/base.py:511: in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/defaulttags.py:853: in do_for
+    nodelist_loop = parser.parse(
+/usr/local/lib/python3.11/site-packages/django/template/base.py:513: in parse
+    raise self.error(token, e)
+/usr/local/lib/python3.11/site-packages/django/template/base.py:511: in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/defaulttags.py:853: in do_for
+    nodelist_loop = parser.parse(
+/usr/local/lib/python3.11/site-packages/django/template/base.py:513: in parse
+    raise self.error(token, e)
+/usr/local/lib/python3.11/site-packages/django/template/base.py:511: in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/defaulttags.py:953: in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/base.py:513: in parse
+    raise self.error(token, e)
+/usr/local/lib/python3.11/site-packages/django/template/base.py:511: in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/defaulttags.py:953: in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/django/template/base.py:507: in parse
+    self.invalid_block_tag(token, command, parse_until)
+/usr/local/lib/python3.11/site-packages/django/template/base.py:558: in invalid_block_tag
+    raise self.error(
+E   django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 136: 'empty', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+----------------------------- Captured stderr call -----------------------------
+[2026-02-20 10:58:35,630] ERROR django.request log:246 Internal Server Error: /dashboard/projects/1/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 505, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'empty'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/apps/dashboard/task_views.py", line 235, in project_detail_view
+    return render(
+           ^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/defaulttags.py", line 853, in do_for
+    nodelist_loop = parser.parse(
+                    ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/defaulttags.py", line 853, in do_for
+    nodelist_loop = parser.parse(
+                    ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 507, in parse
+    self.invalid_block_tag(token, command, parse_until)
+  File "/usr/local/lib/python3.11/site-packages/django/template/base.py", line 558, in invalid_block_tag
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 136: 'empty', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+--------------------------- Captured stderr teardown ---------------------------
+Destroying test database for alias 'default' ('test_taskmanager')...
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.11.14-final-0 _______________
+
+Name                                                                                                 Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------------------------------------------------------------------------------
+apps/accounts/__init__.py                                                                                0      0      0      0   100%
+apps/accounts/admin.py                                                                                  11      0      0      0   100%
+apps/accounts/apps.py                                                                                    5      0      0      0   100%
+apps/accounts/migrations/0001_initial.py                                                                 6      0      0      0   100%
+apps/accounts/migrations/0002_remove_user_tenant_user_organization_alter_user_role.py                    4      0      0      0   100%
+apps/accounts/migrations/0003_invitation.py                                                              6      0      0      0   100%
+apps/accounts/migrations/__init__.py                                                                     0      0      0      0   100%
+apps/accounts/models.py                                                                                 72     12      2      1    82%   31, 39-42, 76, 80, 83, 115, 119, 123, 127
+apps/accounts/permissions.py                                                                            21      8      2      0    57%   8, 13, 21, 29, 46-49
+apps/accounts/serializers.py                                                                            90     43      8      0    48%   23-26, 69, 73-82, 102, 105-127, 131-134, 151-162, 166-177
+apps/accounts/urls.py                                                                                    4      0      0      0   100%
+apps/accounts/views.py                                                                                  78     39     10      0    44%   26, 34, 42-44, 51-61, 70-84, 93-101, 120-123, 140-143, 146-160
+apps/audit/__init__.py                                                                                   0      0      0      0   100%
+apps/audit/admin.py                                                                                      9      0      0      0   100%
+apps/audit/apps.py                                                                                       5      0      0      0   100%
+apps/audit/middleware.py                                                                                81     65     36      1    15%   27-56, 59-77, 80-103, 106-109, 112-124
+apps/audit/migrations/0001_initial.py                                                                    7      0      0      0   100%
+apps/audit/migrations/0002_rename_audit_audit_organiz_1c5c31_idx_audit_audit_organiz_155e59_idx.py       4      0      0      0   100%
+apps/audit/migrations/0003_activityentry.py                                                              6      0      0      0   100%
+apps/audit/migrations/__init__.py                                                                        0      0      0      0   100%
+apps/audit/models.py                                                                                    50      2      0      0    96%   49, 99
+apps/audit/serializers.py                                                                               14      0      0      0   100%
+apps/audit/services.py                                                                                  27     16     12      0    28%   18, 32-44, 48, 67
+apps/audit/urls.py                                                                                       3      0      0      0   100%
+apps/audit/views.py                                                                                     24      6      2      0    69%   15, 25, 39-42
+apps/core/__init__.py                                                                                    0      0      0      0   100%
+apps/core/exception_handler.py                                                                          18     18      6      0     0%   1-35
+apps/core/views.py                                                                                      54     32      8      2    39%   24-34, 43, 46-80
+apps/notifications/__init__.py                                                                           0      0      0      0   100%
+apps/notifications/apps.py                                                                               4      0      0      0   100%
+apps/notifications/migrations/0001_initial.py                                                            7      0      0      0   100%
+apps/notifications/migrations/__init__.py                                                                0      0      0      0   100%
+apps/notifications/models.py                                                                            21      1      0      0    95%   48
+apps/notifications/serializers.py                                                                        7      0      0      0   100%
+apps/notifications/services.py                                                                          32     17     10      0    36%   10-12, 23-25, 36-38, 49-51, 62-64, 75-80
+apps/notifications/urls.py                                                                               3      0      0      0   100%
+apps/notifications/views.py                                                                             26     13      6      0    41%   14-17, 25-31, 36-44
+apps/organizations/__init__.py                                                                           0      0      0      0   100%
+apps/organizations/admin.py                                                                              7      0      0      0   100%
+apps/organizations/apps.py                                                                               5      0      0      0   100%
+apps/organizations/migrations/0001_initial.py                                                            5      0      0      0   100%
+apps/organizations/migrations/__init__.py                                                                0      0      0      0   100%
+apps/organizations/models.py                                                                            14      2      2      1    81%   17, 21
+apps/organizations/urls.py                                                                               1      1      0      0     0%   1
+apps/performance/__init__.py                                                                             0      0      0      0   100%
+apps/performance/apps.py                                                                                 5      0      0      0   100%
+apps/performance/migrations/__init__.py                                                                  0      0      0      0   100%
+apps/performance/services.py                                                                            53     41     20      0    16%   23-113
+apps/performance/urls.py                                                                                 3      0      0      0   100%
+apps/performance/views.py                                                                               39     26      8      0    28%   18-40, 49-62
+apps/projects/__init__.py                                                                                0      0      0      0   100%
+apps/projects/admin.py                                                                                  13      0      0      0   100%
+apps/projects/apps.py                                                                                    5      0      0      0   100%
+apps/projects/migrations/0001_initial.py                                                                 7      0      0      0   100%
+apps/projects/migrations/0002_sprint.py                                                                  5      0      0      0   100%
+apps/projects/migrations/__init__.py                                                                     0      0      0      0   100%
+apps/projects/models.py                                                                                 36      3      0      0    92%   31, 60, 77
+apps/projects/serializers.py                                                                            17      0      0      0   100%
+apps/projects/urls.py                                                                                    7      0      0      0   100%
+apps/projects/views.py                                                                                  62     42     18      0    25%   12-14, 21-24, 30-41, 48-51, 59-61, 65-82, 86-102
+apps/tasks/__init__.py                                                                                   0      0      0      0   100%
+apps/tasks/admin.py                                                                                      8      0      0      0   100%
+apps/tasks/apps.py                                                                                       5      0      0      0   100%
+apps/tasks/management/__init__.py                                                                        0      0      0      0   100%
+apps/tasks/management/commands/__init__.py                                                               0      0      0      0   100%
+apps/tasks/management/commands/mark_overdue_tasks.py                                                    10     10      0      0     0%   1-20
+apps/tasks/migrations/0001_initial.py                                                                    8      0      0      0   100%
+apps/tasks/migrations/0002_task_review_approved_at_task_review_approved_by_and_more.py                   6      0      0      0   100%
+apps/tasks/migrations/0003_task_sprint_taskdependency.py                                                 5      0      0      0   100%
+apps/tasks/migrations/__init__.py                                                                        0      0      0      0   100%
+apps/tasks/models.py                                                                                    74     14      8      0    73%   110, 114, 117-127, 169
+apps/tasks/serializers.py                                                                               19      0      0      0   100%
+apps/tasks/services.py                                                                                 139    101     70      0    18%   27-38, 43-60, 65-70, 81-136, 141-147, 152-159, 164-211, 219-235, 243-246
+apps/tasks/urls.py                                                                                       6      0      0      0   100%
+apps/tasks/views.py                                                                                     54     34      8      0    32%   21-24, 32-47, 51-57, 61-63, 67-77, 81-84
+apps/time_tracking/__init__.py                                                                           0      0      0      0   100%
+apps/time_tracking/admin.py                                                                              8      0      0      0   100%
+apps/time_tracking/apps.py                                                                               5      0      0      0   100%
+apps/time_tracking/migrations/0001_initial.py                                                            8      0      0      0   100%
+apps/time_tracking/migrations/__init__.py                                                                0      0      0      0   100%
+apps/time_tracking/models.py                                                                            13      1      0      0    92%   21
+apps/time_tracking/serializers.py                                                                        7      0      0      0   100%
+apps/time_tracking/services.py                                                                          40     17      8      0    48%   22-23, 28-49, 54-62, 66-68
+apps/time_tracking/urls.py                                                                               6      0      0      0   100%
+apps/time_tracking/views.py                                                                             32     19      2      0    38%   15-18, 29-46, 49-51, 54-59
+------------------------------------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                                 1436    583    246      5    51%
+FAIL Required test coverage of 80% not reached. Total coverage: 51.01%
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_pages.py::TestDashboardPages::test_dashboard_login_and_projects_page - django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 136: 'empty', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+========================= 1 failed, 1 passed in 21.39s =========================

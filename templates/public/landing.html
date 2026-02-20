@@ -1,157 +1,280 @@
 {% extends "base.html" %}
-{% block title %}Team Task & Performance{% endblock %}
+{% block title %}TaskFlow — Team Task & Performance Management{% endblock %}
 
 {% block public_content %}
-<div class="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white">
-    <header class="sticky top-0 z-40 border-b border-white/10 bg-gray-950/70 backdrop-blur">
-        <div class="mx-auto max-w-6xl px-4">
+<div class="min-h-screen bg-[#0a0f1a] text-white overflow-hidden">
+    <!-- Ambient background -->
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-brand/10 blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-accent/8 blur-[100px]"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 border-b border-white/[.06] bg-[#0a0f1a]/80 backdrop-blur-xl">
+        <div class="mx-auto max-w-6xl px-6">
             <div class="flex h-16 items-center justify-between">
-                <a href="{% url 'landing' %}" class="flex items-center gap-3">
-                    <div class="h-9 w-9 rounded-xl bg-brand flex items-center justify-center shadow-lg shadow-brand/20">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <a href="{% url 'landing' %}" class="flex items-center gap-3 group">
+                    <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-brand to-accent flex items-center justify-center shadow-lg shadow-brand/20 group-hover:shadow-brand/40 transition-shadow">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <div class="leading-tight">
-                        <div class="text-sm font-semibold tracking-tight">Team Task</div>
-                        <div class="text-xs text-white/60">Performance Management</div>
-                    </div>
+                    <span class="text-lg font-bold tracking-tight">TaskFlow</span>
                 </a>
 
-                <nav class="hidden items-center gap-6 text-sm text-white/70 md:flex">
-                    <a href="#features" class="hover:text-white">Features</a>
-                    <a href="#workflow" class="hover:text-white">Workflow</a>
-                    <a href="#security" class="hover:text-white">Security</a>
+                <nav class="hidden md:flex items-center gap-8 text-sm">
+                    <a href="#features" class="text-white/60 hover:text-white transition-colors">Features</a>
+                    <a href="#workflow" class="text-white/60 hover:text-white transition-colors">Workflow</a>
+                    <a href="#security" class="text-white/60 hover:text-white transition-colors">Security</a>
                 </nav>
 
                 <div class="flex items-center gap-3">
-                    <a href="/dashboard/login/" class="inline-flex items-center rounded-lg border border-white/15 px-4 py-2 text-sm font-medium text-white/90 hover:bg-white/10">
+                    <a href="/dashboard/login/" class="px-4 py-2 text-sm font-medium text-white/80 hover:text-white rounded-lg border border-white/10 hover:border-white/20 hover:bg-white/5 transition-all">
                         Log in
                     </a>
-                    <a href="{% url 'signup' %}" class="inline-flex items-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark shadow-lg shadow-brand/25">
-                        Sign up
+                    <a href="{% url 'signup' %}" class="px-4 py-2 text-sm font-semibold text-white rounded-lg bg-gradient-to-r from-brand to-brand-dark hover:from-brand-dark hover:to-brand shadow-lg shadow-brand/25 hover:shadow-brand/40 transition-all">
+                        Get started free
                     </a>
                 </div>
             </div>
         </div>
     </header>
 
-    <main>
-        <section class="mx-auto max-w-6xl px-4 pt-16 pb-10">
-            <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
-                <div>
-                    <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/80">
-                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                        Multi-tenant SaaS · Role-based workflow · Audit-ready
+    <main class="relative">
+        <!-- Hero -->
+        <section class="mx-auto max-w-6xl px-6 pt-20 pb-16">
+            <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+                <div class="fade-up">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-4 py-1.5 text-xs font-medium text-white/70 mb-6">
+                        <span class="flex h-2 w-2"><span class="animate-ping absolute h-2 w-2 rounded-full bg-success/60"></span><span class="relative h-2 w-2 rounded-full bg-success"></span></span>
+                        Multi-tenant · Sprint planning · Performance analytics
                     </div>
-                    <h1 class="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
-                        Ship projects faster with a disciplined task workflow.
+
+                    <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight leading-[1.1]">
+                        Manage tasks.<br>
+                        <span class="bg-gradient-to-r from-brand-light via-accent to-success bg-clip-text text-transparent">Track performance.</span><br>
+                        Ship faster.
                     </h1>
-                    <p class="mt-4 text-base text-white/70 leading-relaxed">
-                        Manage projects, enforce review-based completion, log time safely, and track performance metrics —
-                        with strict organization isolation and backend-enforced rules.
+
+                    <p class="mt-6 text-lg text-white/60 leading-relaxed max-w-lg">
+                        The complete task management platform for teams. Sprint planning, dependency tracking, code review workflows, and real-time performance analytics — all in one place.
                     </p>
 
-                    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                        <a href="{% url 'signup' %}" class="inline-flex items-center justify-center rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-white hover:bg-brand-dark shadow-lg shadow-brand/25">
+                    <div class="mt-8 flex flex-col sm:flex-row gap-3">
+                        <a href="{% url 'signup' %}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand-dark px-6 py-3.5 text-sm font-semibold text-white shadow-xl shadow-brand/25 hover:shadow-brand/40 hover:scale-[1.02] transition-all">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                             Create your organization
                         </a>
-                        <a href="/dashboard/login/" class="inline-flex items-center justify-center rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/90 hover:bg-white/10">
-                            I already have an account
+                        <a href="/dashboard/login/" class="inline-flex items-center justify-center rounded-xl border border-white/10 px-6 py-3.5 text-sm font-semibold text-white/80 hover:bg-white/5 hover:border-white/20 transition-all">
+                            Sign in to dashboard
                         </a>
                     </div>
 
-                    <div class="mt-8 grid grid-cols-2 gap-4 text-sm text-white/70">
-                        <div class="rounded-xl border border-white/10 bg-white/5 p-4">
-                            <div class="text-white font-semibold">Workflow engine</div>
-                            <div class="mt-1">No “complete” without review + approval.</div>
+                    <div class="mt-10 grid grid-cols-3 gap-4">
+                        <div class="text-center p-3 rounded-xl border border-white/[.06] bg-white/[.02]">
+                            <div class="text-2xl font-bold text-brand-light">7</div>
+                            <div class="text-xs text-white/50 mt-1">Task statuses</div>
                         </div>
-                        <div class="rounded-xl border border-white/10 bg-white/5 p-4">
-                            <div class="text-white font-semibold">Organization isolation</div>
-                            <div class="mt-1">Organizations + project membership enforced.</div>
+                        <div class="text-center p-3 rounded-xl border border-white/[.06] bg-white/[.02]">
+                            <div class="text-2xl font-bold text-accent-light">5</div>
+                            <div class="text-xs text-white/50 mt-1">Team roles</div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="relative">
-                    <div class="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-brand/30 via-emerald-500/10 to-transparent blur-2xl"></div>
-                    <div class="relative rounded-3xl border border-white/10 bg-white/5 p-6">
-                        <div class="flex items-center justify-between">
-                            <div class="text-sm font-semibold">Example: Task lifecycle</div>
-                            <div class="text-xs text-white/60">Backend enforced</div>
-                        </div>
-                        <div class="mt-6 space-y-3">
-                            <div class="flex items-center justify-between rounded-xl border border-white/10 bg-gray-950/30 px-4 py-3">
-                                <div>
-                                    <div class="text-sm font-semibold">Implement login rate limiting</div>
-                                    <div class="text-xs text-white/60">Assignee: Dev · Reviewer: Reviewer</div>
-                                </div>
-                                <div class="rounded-full bg-white/10 px-3 py-1 text-xs">Backlog</div>
-                            </div>
-                            <div class="flex items-center justify-between rounded-xl border border-white/10 bg-gray-950/30 px-4 py-3">
-                                <div>
-                                    <div class="text-sm font-semibold">Add unit tests for transitions</div>
-                                    <div class="text-xs text-white/60">Overdue detection + immutability</div>
-                                </div>
-                                <div class="rounded-full bg-blue-500/20 text-blue-200 px-3 py-1 text-xs">In Review</div>
-                            </div>
-                            <div class="flex items-center justify-between rounded-xl border border-white/10 bg-gray-950/30 px-4 py-3">
-                                <div>
-                                    <div class="text-sm font-semibold">Deploy docker image</div>
-                                    <div class="text-xs text-white/60">Migrations auto-applied</div>
-                                </div>
-                                <div class="rounded-full bg-emerald-500/20 text-emerald-200 px-3 py-1 text-xs">Approved</div>
-                            </div>
-                        </div>
-                        <div class="mt-6 rounded-xl border border-white/10 bg-gray-950/30 p-4">
-                            <div class="text-xs text-white/60">Key rule</div>
-                            <div class="mt-1 text-sm font-semibold">Completion is blocked unless a reviewer approved.</div>
+                        <div class="text-center p-3 rounded-xl border border-white/[.06] bg-white/[.02]">
+                            <div class="text-2xl font-bold text-success-light">100%</div>
+                            <div class="text-xs text-white/50 mt-1">Audit trail</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Interactive task board preview -->
+                <div class="relative fade-up" style="animation-delay: .15s">
+                    <div class="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-brand/20 via-accent/10 to-transparent blur-3xl"></div>
+                    <div class="relative rounded-2xl border border-white/10 bg-white/[.03] backdrop-blur-sm p-6 space-y-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-brand"></div>
+                                <span class="text-sm font-semibold">Sprint Board</span>
+                            </div>
+                            <span class="text-xs text-white/40">Sprint 4 · 3 tasks</span>
+                        </div>
+
+                        <!-- Task cards -->
+                        <div class="space-y-3">
+                            <div class="rounded-xl border border-white/[.08] bg-white/[.04] p-4 hover:bg-white/[.06] transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-semibold">Set up user authentication</span>
+                                    <span class="px-2.5 py-1 text-[10px] font-semibold rounded-full bg-success/20 text-success-light">Completed</span>
+                                </div>
+                                <div class="mt-2 flex items-center gap-3 text-xs text-white/50">
+                                    <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>sarah@team.io</span>
+                                    <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>6h logged</span>
+                                </div>
+                                <div class="mt-2 w-full bg-white/10 rounded-full h-1"><div class="bg-success h-1 rounded-full" style="width:100%"></div></div>
+                            </div>
+
+                            <div class="rounded-xl border border-brand/30 bg-brand/[.06] p-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-semibold">Build sprint dashboard</span>
+                                    <span class="px-2.5 py-1 text-[10px] font-semibold rounded-full bg-brand/20 text-brand-light">In Review</span>
+                                </div>
+                                <div class="mt-2 flex items-center gap-3 text-xs text-white/50">
+                                    <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>alex@team.io</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-warn/20 text-warn text-[10px] font-semibold">High</span>
+                                </div>
+                                <div class="mt-2 w-full bg-white/10 rounded-full h-1"><div class="bg-brand h-1 rounded-full" style="width:70%"></div></div>
+                            </div>
+
+                            <div class="rounded-xl border border-white/[.08] bg-white/[.04] p-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-semibold">Configure notification system</span>
+                                    <span class="px-2.5 py-1 text-[10px] font-semibold rounded-full bg-accent/20 text-accent-light">In Progress</span>
+                                </div>
+                                <div class="mt-2 flex items-center gap-3 text-xs text-white/50">
+                                    <span>Depends on: Auth setup ✓</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-danger/20 text-danger text-[10px] font-semibold">Critical</span>
+                                </div>
+                                <div class="mt-2 w-full bg-white/10 rounded-full h-1"><div class="bg-accent h-1 rounded-full" style="width:40%"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-white/[.06] bg-white/[.03] p-3 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-brand-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            </div>
+                            <div class="text-xs">
+                                <span class="text-white/70 font-medium">Workflow rule:</span>
+                                <span class="text-white/50"> Completion requires reviewer approval</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section id="features" class="mx-auto max-w-6xl px-4 py-12">
-            <div class="grid gap-6 md:grid-cols-3">
-                <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
-                    <div class="text-sm font-semibold">Projects & Teams</div>
-                    <div class="mt-2 text-sm text-white/70">Create projects, add members, and enforce access at the project level.</div>
+        <!-- Features -->
+        <section id="features" class="mx-auto max-w-6xl px-6 py-16">
+            <div class="text-center mb-12 fade-up">
+                <h2 class="text-3xl font-bold tracking-tight">Everything your team needs</h2>
+                <p class="mt-3 text-white/50 max-w-xl mx-auto">From task assignment to performance analytics — purpose-built for engineering teams that ship quality software.</p>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                <div class="rounded-2xl border border-white/[.06] bg-white/[.02] p-6 card-hover">
+                    <div class="w-10 h-10 rounded-xl bg-brand/15 flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-brand-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+                    </div>
+                    <h3 class="font-semibold text-white">Sprint Planning</h3>
+                    <p class="mt-2 text-sm text-white/50 leading-relaxed">Organize tasks into sprints with goals, deadlines, and auto-close. Visual Kanban boards show progress at a glance.</p>
                 </div>
-                <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
-                    <div class="text-sm font-semibold">Time Tracking</div>
-                    <div class="mt-2 text-sm text-white/70">Log time per task. Negative time blocked. Entries immutable after 24h.</div>
+
+                <div class="rounded-2xl border border-white/[.06] bg-white/[.02] p-6 card-hover">
+                    <div class="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-accent-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                    </div>
+                    <h3 class="font-semibold text-white">Task Dependencies</h3>
+                    <p class="mt-2 text-sm text-white/50 leading-relaxed">Define blocking relationships between tasks. Circular dependency detection prevents workflow deadlocks.</p>
                 </div>
-                <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
-                    <div class="text-sm font-semibold">Auditability</div>
-                    <div class="mt-2 text-sm text-white/70">Status change history supports compliance-style review.</div>
+
+                <div class="rounded-2xl border border-white/[.06] bg-white/[.02] p-6 card-hover">
+                    <div class="w-10 h-10 rounded-xl bg-success/15 flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-success-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <h3 class="font-semibold text-white">Review Workflows</h3>
+                    <p class="mt-2 text-sm text-white/50 leading-relaxed">Tasks can't be completed without reviewer approval. Role-based transitions enforce your team's quality gates.</p>
+                </div>
+
+                <div class="rounded-2xl border border-white/[.06] bg-white/[.02] p-6 card-hover">
+                    <div class="w-10 h-10 rounded-xl bg-warn/15 flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-warn-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <h3 class="font-semibold text-white">Time Tracking</h3>
+                    <p class="mt-2 text-sm text-white/50 leading-relaxed">Log time per task with immutable entries after 24 hours. Negative time blocked at the service layer.</p>
+                </div>
+
+                <div class="rounded-2xl border border-white/[.06] bg-white/[.02] p-6 card-hover">
+                    <div class="w-10 h-10 rounded-xl bg-danger/15 flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-danger-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </div>
+                    <h3 class="font-semibold text-white">Performance Scores</h3>
+                    <p class="mt-2 text-sm text-white/50 leading-relaxed">Weighted scoring based on completion rate, overdue tasks, review rejections, and time accuracy.</p>
+                </div>
+
+                <div class="rounded-2xl border border-white/[.06] bg-white/[.02] p-6 card-hover">
+                    <div class="w-10 h-10 rounded-xl bg-brand/15 flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-brand-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    </div>
+                    <h3 class="font-semibold text-white">Smart Notifications</h3>
+                    <p class="mt-2 text-sm text-white/50 leading-relaxed">Get notified on task assignments, review requests, rejections, and overdue detection — all org-scoped.</p>
                 </div>
             </div>
         </section>
 
-        <section id="workflow" class="mx-auto max-w-6xl px-4 pb-12">
-            <div class="rounded-3xl border border-white/10 bg-white/5 p-8">
-                <div class="text-sm font-semibold">Workflow rules (backend)</div>
-                <div class="mt-2 text-sm text-white/70 leading-relaxed">
-                    Backlog → In Progress (assignee only). In Review → Approved (reviewer only). Completed requires approved review.
-                    Archiving requires Project Manager. Owner override available.
+        <!-- Workflow -->
+        <section id="workflow" class="mx-auto max-w-6xl px-6 py-16">
+            <div class="rounded-3xl border border-white/[.06] bg-white/[.02] p-8 lg:p-12">
+                <h2 class="text-2xl font-bold tracking-tight mb-6">Backend-enforced workflow</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-brand/20 flex items-center justify-center shrink-0 mt-0.5"><span class="text-xs font-bold text-brand-light">1</span></div>
+                            <div><div class="text-sm font-semibold text-white">Backlog → In Progress</div><div class="text-sm text-white/50">Only the assignee can start a task</div></div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-brand/20 flex items-center justify-center shrink-0 mt-0.5"><span class="text-xs font-bold text-brand-light">2</span></div>
+                            <div><div class="text-sm font-semibold text-white">In Review → Approved</div><div class="text-sm text-white/50">Only the reviewer can approve</div></div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-brand/20 flex items-center justify-center shrink-0 mt-0.5"><span class="text-xs font-bold text-brand-light">3</span></div>
+                            <div><div class="text-sm font-semibold text-white">Approved → Completed</div><div class="text-sm text-white/50">Cannot complete without review approval</div></div>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-3 h-3 text-accent-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            </div>
+                            <div><div class="text-sm font-semibold text-white">Organization isolation</div><div class="text-sm text-white/50">Zero cross-tenant data leaks, enforced at every layer</div></div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-3 h-3 text-accent-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
+                            </div>
+                            <div><div class="text-sm font-semibold text-white">Dependency checks</div><div class="text-sm text-white/50">Can't start a task until all blockers are resolved</div></div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-3 h-3 text-accent-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
+                            </div>
+                            <div><div class="text-sm font-semibold text-white">Immutable audit log</div><div class="text-sm text-white/50">Every action recorded, time entries locked after 24h</div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section id="security" class="mx-auto max-w-6xl px-4 pb-16">
-            <div class="rounded-3xl border border-white/10 bg-white/5 p-8">
-                <div class="text-sm font-semibold">Security posture</div>
-                <div class="mt-2 text-sm text-white/70 leading-relaxed">
-                    JWT authentication for API, CSRF protection for session-based dashboard, strict organization isolation, and project membership enforcement.
+        <!-- Security -->
+        <section id="security" class="mx-auto max-w-6xl px-6 pb-20">
+            <div class="grid md:grid-cols-3 gap-5">
+                <div class="rounded-2xl border border-white/[.06] bg-white/[.02] p-6">
+                    <div class="text-sm font-semibold text-white">JWT Authentication</div>
+                    <div class="mt-2 text-sm text-white/50">Secure API access with token rotation and blacklisting on logout.</div>
+                </div>
+                <div class="rounded-2xl border border-white/[.06] bg-white/[.02] p-6">
+                    <div class="text-sm font-semibold text-white">Role-Based Access</div>
+                    <div class="mt-2 text-sm text-white/50">Owner, PM, Developer, Reviewer, Viewer — each with precise permissions.</div>
+                </div>
+                <div class="rounded-2xl border border-white/[.06] bg-white/[.02] p-6">
+                    <div class="text-sm font-semibold text-white">Token Invitations</div>
+                    <div class="mt-2 text-sm text-white/50">Secure invite links with 48h expiry, single-use tokens, and role assignment.</div>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="border-t border-white/10 py-10">
-        <div class="mx-auto max-w-6xl px-4 text-sm text-white/60">
-            Built with Django + DRF · Production settings supported · Docker + Gunicorn
+    <footer class="border-t border-white/[.06] py-8">
+        <div class="mx-auto max-w-6xl px-6 flex items-center justify-between text-sm text-white/40">
+            <span>© 2026 TaskFlow. Built with Django + DRF.</span>
+            <span>Docker · Gunicorn · PostgreSQL</span>
         </div>
     </footer>
 </div>

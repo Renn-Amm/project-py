@@ -5,9 +5,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.accounts.models import Invitation, UserRole
 from apps.accounts.permissions import IsAdminOrAbove
 from apps.accounts.serializers import (
     ChangePasswordSerializer,
+    InvitationAcceptSerializer,
+    InvitationCreateSerializer,
     UserCreateSerializer,
     UserSerializer,
 )
@@ -79,3 +82,79 @@ class LogoutView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response({"message": "Logged out successfully."})
+
+
+class InvitationCreateView(APIView):
+    """Create an invitation. Only Owner or Project Manager can invite."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role not in (UserRole.OWNER, UserRole.PROJECT_MANAGER):
+            return Response(
+                {"error": "Only Owner or Project Manager can send invitations."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        serializer = InvitationCreateSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        invitation = serializer.save()
+        return Response(
+            {
+                "id": invitation.id,
+                "email": invitation.email,
+                "role": invitation.role,
+                "token": invitation.token,
+                "expires_at": invitation.expires_at.isoformat(),
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class InvitationAcceptView(APIView):
+    """Accept an invitation using the token. Public endpoint."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request):
+        serializer = InvitationAcceptSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(
+            {
+                "id": user.id,
+                "email": user.email,
+                "role": user.role,
+                "organization": user.organization_id,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class InvitationListView(generics.ListAPIView):
+    """List invitations for the user's organization."""
+
+    permission_classes = [IsAuthenticated, IsAdminOrAbove]
+
+    def get_queryset(self):
+        org = getattr(self.request.user, "organization", None)
+        if not org:
+            return Invitation.objects.none()
+        return Invitation.objects.filter(organization=org).order_by("-created_at")
+
+    def list(self, request, *args, **kwargs):
+        qs = self.get_queryset()
+        data = [
+            {
+                "id": inv.id,
+                "email": inv.email,
+                "role": inv.role,
+                "is_valid": inv.is_valid,
+                "is_used": inv.is_used,
+                "is_expired": inv.is_expired,
+                "created_at": inv.created_at.isoformat(),
+                "expires_at": inv.expires_at.isoformat(),
+            }
+            for inv in qs[:100]
+        ]
+        return Response(data)

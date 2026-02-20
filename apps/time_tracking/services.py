@@ -8,6 +8,8 @@ from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
+from apps.audit.models import ActivityType
+from apps.audit.services import ActivityFeedService
 from apps.tasks.models import TaskStatus
 from apps.time_tracking.models import TimeEntry
 
@@ -33,6 +35,17 @@ class TimeEntryService:
 
         entry = TimeEntry.objects.create(user=user, task=task, hours=hours, date=date)
         TimeEntryService.recalculate_task_total(task)
+
+        # Activity feed
+        ActivityFeedService.record(
+            organization=task.project.organization,
+            actor=user,
+            activity_type=ActivityType.TIME_LOGGED,
+            task=task,
+            description=f"{user.email} logged {hours}h on '{task.title}'",
+            metadata={"hours": str(hours), "date": str(date)},
+        )
+
         return entry
 
     @staticmethod

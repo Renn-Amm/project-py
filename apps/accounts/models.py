@@ -1,9 +1,11 @@
+from django.conf import settings
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
 )
 from django.db import models
+from django.utils import timezone
 
 
 class UserRole(models.TextChoices):
@@ -79,3 +81,47 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def has_role_level(self, minimum_role):
         return self.role_level >= ROLE_HIERARCHY.get(minimum_role, 0)
+
+
+class Invitation(models.Model):
+    email = models.EmailField(db_index=True)
+    role = models.CharField(max_length=20, choices=UserRole.choices)
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        related_name="invitations",
+    )
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sent_invitations",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "accounts_invitation"
+        indexes = [
+            models.Index(fields=["organization", "-created_at"]),
+            models.Index(fields=["token", "used_at"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=["organization", "email"], name="uniq_org_email_invitation"),
+        ]
+
+    def __str__(self):
+        return f"{self.email} invited to {self.organization.name} as {self.role}"
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    @property
+    def is_used(self):
+        return self.used_at is not None
+
+    @property
+    def is_valid(self):
+        return not self.is_used and not self.is_expired

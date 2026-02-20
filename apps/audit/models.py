@@ -47,3 +47,53 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.actor} {self.action} {self.object_type}:{self.object_id}"
+
+
+class ActivityType(models.TextChoices):
+    STATUS_CHANGE = "status_change", "Status Change"
+    TIME_LOGGED = "time_logged", "Time Logged"
+    REVIEW_SUBMITTED = "review_submitted", "Review Submitted"
+    ASSIGNMENT_CHANGED = "assignment_changed", "Assignment Changed"
+    TASK_CREATED = "task_created", "Task Created"
+    COMMENT_ADDED = "comment_added", "Comment Added"
+
+
+class ActivityEntry(models.Model):
+    """Immutable activity feed entry — append-only audit trail."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        related_name="activity_entries",
+    )
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="activity_entries",
+    )
+    activity_type = models.CharField(
+        max_length=30,
+        choices=ActivityType.choices,
+        db_index=True,
+    )
+    task = models.ForeignKey(
+        "tasks.Task",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="activity_entries",
+    )
+    description = models.TextField()
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["organization", "-created_at"]),
+            models.Index(fields=["task", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.activity_type}: {self.description[:50]}"

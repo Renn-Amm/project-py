@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Notifications — TaskFlow{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="fade-up">
+    <div class="flex items-start justify-between gap-4 mb-8">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Notifications</h2>
+            <p class="text-sm text-gray-500 dark:text-white/40 mt-1">Stay updated on task assignments, reviews, and
+                alerts</p>
+        </div>
+        {% if notifications %}
+        <form method="post" action="{% url 'dashboard_notifications_mark_all_read' %}">
+            {% csrf_token %}
+            <button
+                class="rounded-xl bg-brand/10 dark:bg-brand/15 text-brand dark:text-brand-light px-4 py-2 text-sm font-semibold hover:bg-brand/20 transition-all">
+                Mark all as read
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="rounded-2xl border border-gray-200/60 dark:border-white/[.06] bg-white dark:bg-white/[.02]">
+        <div class="divide-y divide-gray-50 dark:divide-white/[.03]">
+            {% for n in notifications %}
+            <div
+                class="px-6 py-4 flex items-start gap-4 {% if not n.is_read %}bg-brand/[.02] dark:bg-brand/[.04]{% endif %}">
+                <div class="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center mt-0.5
+                    {% if n.notification_type == 'task_assigned' %}bg-brand/10
+                    {% elif n.notification_type == 'moved_to_review' %}bg-accent/10
+                    {% elif n.notification_type == 'review_rejected' %}bg-danger/10
+                    {% elif n.notification_type == 'overdue_detected' %}bg-warn/10
+                    {% else %}bg-gray-100 dark:bg-white/[.06]{% endif %}">
+                    {% if n.notification_type == 'task_assigned' %}
+                    <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    {% elif n.notification_type == 'moved_to_review' %}
+                    <svg class="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    {% elif n.notification_type == 'review_rejected' %}
+                    <svg class="w-4 h-4 text-danger" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    {% elif n.notification_type == 'overdue_detected' %}
+                    <svg class="w-4 h-4 text-warn" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-gray-800 dark:text-white">{{ n.title }}</span>
+                        {% if not n.is_read %}<span class="w-2 h-2 rounded-full bg-brand"></span>{% endif %}
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-white/40 mt-0.5">{{ n.message }}</p>
+                    <span class="text-xs text-gray-400 dark:text-white/25 mt-1 block">{{ n.created_at|timesince }}
+                        ago</span>
+                </div>
+                {% if not n.is_read %}
+                <form method="post" action="{% url 'dashboard_notification_mark_read' pk=n.id %}" class="shrink-0">
+                    {% csrf_token %}
+                    <button class="text-xs text-brand dark:text-brand-light hover:underline">Mark read</button>
+                </form>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="px-6 py-16 text-center">
+                <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-white/10 mb-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <div class="text-gray-400 dark:text-white/25 font-medium">No notifications</div>
+                <div class="text-sm text-gray-300 dark:text-white/15 mt-1">You're all caught up!</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

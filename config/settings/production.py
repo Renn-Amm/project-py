@@ -13,7 +13,7 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 # Security headers
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "false").lower() == "true"
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
@@ -35,21 +35,31 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-# Database SSL
-DATABASES["default"]["OPTIONS"] = {  # noqa: F405
-    "sslmode": "require",
-}
-
-# Caching
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": os.environ.get("REDIS_URL", "redis://localhost:6379/0"),
-        "OPTIONS": {
-            "ssl_cert_reqs": None,
-        },
+# Database SSL — only enable when the provider supports it
+_db_sslmode = os.environ.get("DB_SSLMODE", "")
+if _db_sslmode:
+    DATABASES["default"]["OPTIONS"] = {  # noqa: F405
+        "sslmode": _db_sslmode,
     }
-}
+
+# Caching — use Redis when available, fall back to in-memory
+_redis_url = os.environ.get("REDIS_URL")
+if _redis_url:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": _redis_url,
+            "OPTIONS": {
+                "ssl_cert_reqs": None,
+            },
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
+    }
 
 # Tighter throttle rates in production
 REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {  # noqa: F405
@@ -58,18 +68,9 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {  # noqa: F405
     "evaluation": "2000/minute",
 }
 
-# Production logging
+# Production logging — console only (Render has read-only filesystem)
 logging_config: dict[str, Any] = cast(dict[str, Any], getattr(base_settings, "LOGGING", {}))
-handlers: dict[str, Any] = cast(dict[str, Any], logging_config.get("handlers", {}))
 root: dict[str, Any] = cast(dict[str, Any], logging_config.get("root", {}))
-
-handlers["file"] = {
-    "class": "logging.FileHandler",
-    "filename": os.environ.get("LOG_FILE", "/var/log/taskmanager/app.log"),
-    "formatter": "structured",  # noqa: F405
-}
-root["handlers"] = ["console", "file"]
-
-logging_config["handlers"] = handlers
+root["level"] = "WARNING"
 logging_config["root"] = root
 LOGGING = logging_config

@@ -1,18 +1,30 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ sidebarOpen: true, darkMode: false }" :class="{ 'dark': darkMode }">
+<html lang="en" x-data="{ sidebarOpen: true, darkMode: localStorage.getItem('dm')==='1' }" :class="{ 'dark': darkMode }"
+    x-init="$watch('darkMode', v => localStorage.setItem('dm', v?'1':'0'))">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Task Manager{% endblock %}</title>
+    <meta name="description" content="Multi-tenant team task and performance management system">
+    <title>{% block title %}TaskFlow{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%236366f1'/><path d='M30 52l15 15 25-30' stroke='white' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
                     colors: {
-                        sidebar: { DEFAULT: '#0f172a', hover: '#1e293b', active: '#334155' },
-                        brand: { DEFAULT: '#6366f1', light: '#818cf8', dark: '#4f46e5' },
+                        sidebar: { DEFAULT: '#0c1222', hover: '#162032', active: '#1e2d47' },
+                        brand: { DEFAULT: '#6366f1', light: '#818cf8', dark: '#4f46e5', 50: '#eef2ff' },
+                        accent: { DEFAULT: '#06b6d4', light: '#22d3ee' },
+                        success: { DEFAULT: '#10b981', light: '#34d399' },
+                        warn: { DEFAULT: '#f59e0b', light: '#fbbf24' },
+                        danger: { DEFAULT: '#ef4444', light: '#f87171' },
                     }
                 }
             }
@@ -21,65 +33,168 @@
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     <script defer src="https://unpkg.com/alpinejs@3.14.3/dist/cdn.min.js"></script>
     <style>
-        [x-cloak] { display: none !important; }
-        .htmx-indicator { display: none; }
-        .htmx-request .htmx-indicator { display: inline-block; }
-        .htmx-request.htmx-indicator { display: inline-block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeIn 0.2s ease-out; }
-        .toast-enter { animation: fadeIn 0.3s ease-out; }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        * {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .htmx-indicator {
+            display: none;
+        }
+
+        .htmx-request .htmx-indicator {
+            display: inline-block;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(99, 102, 241, .15);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(99, 102, 241, .3);
+            }
+        }
+
+        .fade-up {
+            animation: fadeUp .4s ease-out both;
+        }
+
+        .slide-in {
+            animation: slideIn .3s ease-out both;
+        }
+
+        .toast-enter {
+            animation: slideIn .3s ease-out both;
+        }
+
+        .card-hover {
+            transition: all .2s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, .1);
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, .05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .gradient-border {
+            background: linear-gradient(135deg, rgba(99, 102, 241, .2), rgba(6, 182, 212, .2));
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, .3);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, .5);
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
-{% if user.is_authenticated %}
-<div class="flex min-h-screen">
-    {% include "partials/sidebar.html" %}
+<body class="bg-gray-50 dark:bg-[#0a0f1a] text-gray-900 dark:text-gray-100 min-h-screen antialiased"
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
-    <div class="flex-1 flex flex-col min-w-0" :class="sidebarOpen ? 'ml-64' : 'ml-16'" style="transition: margin-left 0.2s">
-        {% include "partials/topbar.html" %}
+    {% if user.is_authenticated %}
+    <div class="flex min-h-screen">
+        {% include "partials/sidebar.html" %}
 
-        <main class="flex-1 p-6 overflow-auto">
-            {% if messages %}
-            <div class="mb-4 space-y-2">
-                {% for message in messages %}
-                <div class="toast-enter px-4 py-3 rounded-lg text-sm font-medium
-                    {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800
-                    {% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800
-                    {% elif message.tags == 'warning' %}bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800
-                    {% else %}bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800{% endif %}">
-                    {{ message }}
+        <div class="flex-1 flex flex-col min-w-0 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-16'">
+            {% include "partials/topbar.html" %}
+
+            <main class="flex-1 p-6 lg:p-8 overflow-auto">
+                {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                    <div class="slide-in flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                    {% if message.tags == 'success' %}bg-success/10 text-success border border-success/20
+                    {% elif message.tags == 'error' %}bg-danger/10 text-danger border border-danger/20
+                    {% elif message.tags == 'warning' %}bg-warn/10 text-warn border border-warn/20
+                    {% else %}bg-brand/10 text-brand border border-brand/20{% endif %}">
+                        {% if message.tags == 'success' %}
+                        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {% elif message.tags == 'error' %}
+                        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+                {% endif %}
 
-            {% block content %}{% endblock %}
-        </main>
+                {% block content %}{% endblock %}
+            </main>
+        </div>
     </div>
-</div>
-{% else %}
+    {% else %}
     {% block public_content %}{% endblock %}
-{% endif %}
+    {% endif %}
 
-<div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
 
-<script>
-document.body.addEventListener('htmx:afterSwap', function(evt) {
-    if (evt.detail.target.id === 'toast-container' || evt.detail.xhr.getResponseHeader('HX-Trigger')) {
-        setTimeout(() => { const t = document.querySelector('#toast-container .toast-enter'); if(t) t.remove(); }, 4000);
-    }
-});
-document.body.addEventListener('showToast', function(evt) {
-    const c = document.getElementById('toast-container');
-    const d = document.createElement('div');
-    d.className = 'toast-enter px-4 py-3 rounded-lg text-sm font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300';
-    d.textContent = evt.detail.message || 'Done';
-    c.appendChild(d);
-    setTimeout(() => d.remove(), 4000);
-});
-</script>
-{% block extra_js %}{% endblock %}
+    <script>
+        document.body.addEventListener('showToast', function (evt) {
+            const c = document.getElementById('toast-container');
+            const d = document.createElement('div');
+            d.className = 'toast-enter flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium bg-success/10 text-success border border-success/20';
+            d.innerHTML = '<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' + (evt.detail.message || 'Done');
+            c.appendChild(d);
+            setTimeout(() => d.remove(), 4000);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
+
 </html>

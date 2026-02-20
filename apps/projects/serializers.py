@@ -1,6 +1,22 @@
 from rest_framework import serializers
 
-from apps.projects.models import Project, ProjectMember
+from apps.projects.models import Project, ProjectMember, Sprint
+
+
+class SprintSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sprint
+        fields = [
+            "id",
+            "project",
+            "name",
+            "goal",
+            "start_date",
+            "end_date",
+            "is_closed",
+            "created_at",
+        ]
+        read_only_fields = ["id", "project", "is_closed", "created_at"]
 
 
 class ProjectSerializer(serializers.ModelSerializer):

@@ -11,8 +11,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from apps.accounts.models import UserRole
-from apps.audit.models import AuditLog
+from apps.accounts.models import Invitation, UserRole
+from apps.audit.models import ActivityEntry, AuditLog
+from apps.notifications.models import Notification
 from apps.projects.models import Project, ProjectMember
 from apps.tasks.models import Task, TaskStatus
 from apps.tasks.services import TaskWorkflowService
@@ -398,3 +399,124 @@ def time_entry_create_view(request, task_pk: int):
     except Exception:
         messages.error(request, "Failed to log time.")
         return redirect("dashboard_task_detail", pk=task_pk)
+
+
+# ---------------------------------------------------------------------------
+# Invitation views
+# ---------------------------------------------------------------------------
+
+
+@login_required
+def invitation_list_view(request):
+    org = _org(request)
+    if not org:
+        return render(request, "dashboard/invitations.html", {"invitations": []})
+
+    invitations = (
+        Invitation.objects
+        .filter(organization=org)
+        .order_by("-created_at")
+    )[:100]
+
+    return render(request, "dashboard/invitations.html", {"invitations": invitations})
+
+
+@require_POST
+@login_required
+def invitation_create_view(request):
+    org = _org(request)
+    if request.user.role not in (UserRole.OWNER, UserRole.PROJECT_MANAGER):
+        messages.error(request, "Only owners and project managers can send invitations.")
+        return redirect("dashboard_invitations")
+
+    email = (request.POST.get("email") or "").strip().lower()
+    role = request.POST.get("role") or "developer"
+
+    if not email:
+        messages.error(request, "Email is required.")
+        return redirect("dashboard_invitations")
+
+    if User.objects.filter(email=email, organization=org).exists():
+        messages.error(request, "This user is already in your organization.")
+        return redirect("dashboard_invitations")
+
+    if Invitation.objects.filter(email=email, organization=org, is_used=False).exists():
+        messages.error(request, "An active invitation already exists for this email.")
+        return redirect("dashboard_invitations")
+
+    import secrets
+    Invitation.objects.create(
+        email=email,
+        role=role,
+        organization=org,
+        created_by=request.user,
+        token=secrets.token_urlsafe(32),
+        expires_at=timezone.now() + timedelta(hours=48),
+    )
+    messages.success(request, f"Invitation sent to {email}.")
+    return redirect("dashboard_invitations")
+
+
+# ---------------------------------------------------------------------------
+# Notification views
+# ---------------------------------------------------------------------------
+
+
+@login_required
+def notification_list_view(request):
+    org = _org(request)
+    if not org:
+        return render(request, "dashboard/notifications.html", {"notifications": []})
+
+    notifications = (
+        Notification.objects
+        .filter(recipient=request.user, organization=org)
+        .order_by("-created_at")
+    )[:100]
+
+    return render(request, "dashboard/notifications.html", {"notifications": notifications})
+
+
+@require_POST
+@login_required
+def notification_mark_read_view(request, pk: int):
+    notif = get_object_or_404(
+        Notification, pk=pk, recipient=request.user, organization=_org(request)
+    )
+    notif.is_read = True
+    notif.save(update_fields=["is_read"])
+    messages.success(request, "Notification marked as read.")
+    return redirect("dashboard_notifications")
+
+
+@require_POST
+@login_required
+def notifications_mark_all_read_view(request):
+    org = _org(request)
+    if org:
+        Notification.objects.filter(
+            recipient=request.user, organization=org, is_read=False
+        ).update(is_read=True)
+    messages.success(request, "All notifications marked as read.")
+    return redirect("dashboard_notifications")
+
+
+# ---------------------------------------------------------------------------
+# Activity Feed view
+# ---------------------------------------------------------------------------
+
+
+@login_required
+def activity_feed_view(request):
+    org = _org(request)
+    if not org:
+        return render(request, "dashboard/activity.html", {"activities": []})
+
+    activities = (
+        ActivityEntry.objects
+        .filter(organization=org)
+        .select_related("actor", "task")
+        .order_by("-created_at")
+    )[:200]
+
+    return render(request, "dashboard/activity.html", {"activities": activities})

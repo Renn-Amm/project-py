@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.db import connection
+from django.db import connection, transaction
 from django.shortcuts import redirect, render
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -65,15 +65,16 @@ def signup_view(request):
             messages.error(request, "An account with this email already exists.")
             return render(request, "public/signup.html")
 
-        organization = Organization.objects.create(name=organization_name)
-        user = User.objects.create_user(
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            role="owner",
-            organization=organization,
-        )
+        with transaction.atomic():
+            organization = Organization.objects.create(name=organization_name)
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                role="owner",
+                organization=organization,
+            )
 
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return redirect("dashboard_home")

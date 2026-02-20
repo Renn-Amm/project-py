@@ -21,7 +21,7 @@ ENV PYTHONUNBUFFERED=1
 ENV DJANGO_ENV=production
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 && \
+    libpq5 postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
 # Create non-root user

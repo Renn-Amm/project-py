@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.audit.models import AuditLog
+from apps.audit.models import ActivityEntry, AuditLog
 
 
 class AuditLogSerializer(serializers.ModelSerializer):
@@ -22,5 +22,26 @@ class AuditLogSerializer(serializers.ModelSerializer):
             "metadata",
             "ip_address",
             "timestamp",
+        ]
+        read_only_fields = fields
+
+
+class ActivityEntrySerializer(serializers.ModelSerializer):
+    actor_email = serializers.EmailField(
+        source="actor.email", read_only=True, default=None
+    )
+
+    class Meta:
+        model = ActivityEntry
+        fields = [
+            "id",
+            "organization",
+            "actor",
+            "actor_email",
+            "activity_type",
+            "task",
+            "description",
+            "metadata",
+            "created_at",
         ]
         read_only_fields = fields

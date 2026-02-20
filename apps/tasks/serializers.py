@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.tasks.models import Task, TaskStatus, TaskStatusChange
+from apps.tasks.models import Task, TaskDependency, TaskStatus, TaskStatusChange
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -13,6 +13,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "description",
             "priority",
             "status",
+            "sprint",
             "assignee",
             "reviewer",
             "deadline",
@@ -51,3 +52,10 @@ class TaskStatusChangeSerializer(serializers.ModelSerializer):
 
 class TaskTransitionSerializer(serializers.Serializer):
     to_status = serializers.ChoiceField(choices=TaskStatus.choices)
+
+
+class TaskDependencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskDependency
+        fields = ["id", "task", "depends_on", "created_at"]
+        read_only_fields = ["id", "created_at"]

@@ -1,50 +1,66 @@
-# Task Manager
+# TaskFlow
 
-Task Manager is a Django web application for organization-scoped project and task management, including dashboards, workflow transitions, time tracking, and audit logging.
+TaskFlow is a multi-tenant team task and performance management system built with Django. It provides organization-scoped project management, sprint planning, task workflows with review gates, time tracking, performance analytics, and a full audit trail.
 
 ## Features
 
-Authentication:
+### Authentication & Organization
+- Sign up creates an organization + owner account
+- JWT-based API authentication with token rotation
+- Session-based dashboard login
+- Token-based team invitations (48h expiry, single-use)
+- 5 roles: Owner, Project Manager, Developer, Reviewer, Viewer
 
-- Sign up, sign in, sign out (JWT + dashboard login)
+### Project & Task Management
+- Organization-scoped projects with membership enforcement
+- Kanban-style task board with 7 statuses: Backlog → In Progress → On Hold → In Review → Approved → Completed → Archived
+- Backend-enforced workflow transitions (e.g., only reviewer can approve, completion requires review)
+- Task priorities: Low, Medium, High, Critical (with weighted scoring)
+- Task dependencies with circular dependency detection
+- Sprint planning with goals, start/end dates, and auto-close
 
-Organization-scoped project management:
+### Time Tracking
+- Per-task time entries with daily granularity
+- Immutable entries after 24-hour edit window
+- Negative time validation at the service layer
 
-- Projects
-- Membership enforcement
+### Performance Analytics
+- Weighted performance scoring: completion rate, overdue rate, rejection rate, time accuracy
+- Team leaderboard by hours logged
+- Weekly analytics: completed tasks, hours, overdue counts, status breakdown
+- 30-day performance metrics
 
-Task management:
+### Notifications & Activity Feed
+- Smart notifications: task assignments, review requests, rejections, overdue alerts
+- Mark read / mark all read
+- Immutable activity feed (append-only audit trail)
+- Activity types: status change, time logged, review submitted, assignment changed, task created
 
-- Kanban-style statuses and backend-enforced workflow transitions
-- Review-gated completion rules
-- Overdue detection via management command
+### Audit & Security
+- Middleware-driven mutation logging for all API actions
+- Organization-scoped immutable audit log
+- Zero cross-tenant data leaks enforced at every layer
 
-Time tracking:
-
-- Time entries per task
-- Restricted edits (immutability window)
-
-Audit logging:
-
-- Middleware-driven mutation logging for key API actions
-- Organization-scoped audit trail
-
-Dashboard:
-
-- Entity counts
-- Performance metrics pages
-- Audit log view
+### Dashboard
+- Premium dark/light mode UI with Inter font
+- Landing page with feature showcase
+- Kanban board with color-coded status columns
+- Performance metrics with leaderboard
+- Analytics with status breakdown bars
+- Audit log table with action badges
+- Invitation management (send, view status)
+- Notification center with unread indicators
+- Activity feed timeline
 
 ## Tech Stack
 
-- Python + Django 4.2 LTS
-- Django REST Framework
-- Server-rendered templates for the dashboard
-- Gunicorn (production)
-- PostgreSQL via `DATABASE_URL`
-- Docker + docker-compose for local development
-- Quality tooling: ruff + mypy + pre-commit
-- CI: GitHub Actions (lint, typecheck, migrations check, tests, coverage, pip-audit)
+- **Backend:** Python 3.12 + Django 4.2 LTS + Django REST Framework
+- **Frontend:** Server-rendered templates, Tailwind CSS (CDN), Alpine.js, HTMX
+- **Database:** PostgreSQL via `DATABASE_URL`
+- **Server:** Gunicorn (production)
+- **Infrastructure:** Docker + docker-compose
+- **Quality:** ruff, mypy, pre-commit, pytest (≥80% coverage)
+- **CI/CD:** GitHub Actions (lint, typecheck, migrations check, tests, coverage, pip-audit)
 
 ## Project Structure
 
@@ -54,45 +70,97 @@ Dashboard:
 │   ├── settings/
 │   │   ├── base.py
 │   │   ├── development.py
+│   │   ├── local.py
 │   │   ├── production.py
 │   │   └── test.py
 │   ├── urls.py
 │   └── wsgi.py
 ├── apps/
-│   ├── accounts/
-│   ├── organizations/
-│   ├── projects/
-│   ├── tasks/
-│   ├── time_tracking/
-│   ├── audit/
-│   ├── core/
-│   └── dashboard/
+│   ├── accounts/         # User model, Invitation model, JWT views
+│   ├── organizations/    # Organization model
+│   ├── projects/         # Project, ProjectMember, Sprint models
+│   ├── tasks/            # Task, TaskDependency, TaskStatusChange models
+│   ├── time_tracking/    # TimeEntry model and service
+│   ├── notifications/    # Notification model
+│   ├── performance/      # Performance scoring engine
+│   ├── audit/            # AuditLog, ActivityEntry models
+│   ├── core/             # Health check, landing page, signup views
+│   └── dashboard/        # Server-rendered dashboard views
 ├── templates/
+│   ├── base.html
+│   ├── public/           # Landing page, signup
+│   ├── dashboard/        # All dashboard pages
+│   └── partials/         # Sidebar, topbar
 ├── tests/
 ├── requirements/
-│   ├── prod.in
-│   ├── prod.txt
-│   ├── dev.in
-│   └── dev.txt
+│   ├── prod.in / prod.txt
+│   └── dev.in / dev.txt
 └── .github/
     └── workflows/
         ├── ci.yml
         └── cd.yml
 ```
 
+## API Endpoints
+
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/login/` | JWT login |
+| POST | `/api/auth/token/refresh/` | Refresh JWT |
+| POST | `/api/auth/logout/` | Blacklist token |
+| GET | `/api/auth/me/` | Current user profile |
+
+### Projects & Sprints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST | `/api/projects/` | List/create projects |
+| GET/PUT/DELETE | `/api/projects/{id}/` | Project CRUD |
+| GET/POST | `/api/sprints/` | List/create sprints |
+| GET/PUT/DELETE | `/api/sprints/{id}/` | Sprint CRUD |
+
+### Tasks
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST | `/api/tasks/` | List/create tasks |
+| GET/PUT/DELETE | `/api/tasks/{id}/` | Task CRUD |
+| POST | `/api/tasks/{id}/transition/` | Status transition |
+| GET/POST | `/api/tasks/{id}/dependencies/` | Manage dependencies |
+
+### Time Tracking
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST | `/api/time-entries/` | List/create time entries |
+
+### Performance
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/performance/score/` | User performance score |
+| GET | `/api/performance/team/` | Team leaderboard |
+
+### Notifications
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/notifications/` | List notifications |
+| POST | `/api/notifications/{id}/read/` | Mark as read |
+
+### Audit
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/audit/logs/` | Audit log (admin) |
+| GET | `/api/audit/activity/` | Activity feed |
+
+### Invitations
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/invitations/` | Create invitation |
+| POST | `/api/invitations/accept/` | Accept invitation |
+
 ## Local Setup
-
-Create and activate a virtual environment.
-
-Install dependencies.
-
-Run migrations.
-
-Start the server.
 
 ```bash
 python -m venv .venv
-. .venv/Scripts/activate
+. .venv/Scripts/activate       # Windows: .venv\Scripts\activate
 
 pip install -r requirements/dev.txt
 
@@ -100,128 +168,64 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-## Dependency Management
+Or with Docker:
 
-Install pip-tools once in your active virtualenv:
+```bash
+docker-compose up --build
+```
+
+## Dependency Management
 
 ```bash
 pip install pip-tools
-```
 
-Direct dependencies live in:
-
-- `requirements/prod.in`
-- `requirements/dev.in`
-
-Lock files consumed by CI/local installs:
-
-- `requirements/prod.txt`
-- `requirements/dev.txt`
-
-Regenerate lock files without upgrading versions:
-
-```bash
+# Lock without upgrading
 pip-compile requirements/prod.in --generate-hashes -o requirements/prod.txt
 pip-compile requirements/dev.in --generate-hashes -o requirements/dev.txt
-```
 
-Upgrade all dependencies and refresh lock files:
-
-```bash
+# Upgrade all
 pip-compile --upgrade requirements/prod.in --generate-hashes -o requirements/prod.txt
 pip-compile --upgrade requirements/dev.in --generate-hashes -o requirements/dev.txt
 ```
 
-Upgrade a single dependency and refresh lock files:
-
-```bash
-pip-compile --upgrade-package Django requirements/prod.in --generate-hashes -o requirements/prod.txt
-pip-compile --upgrade-package Django requirements/dev.in --generate-hashes -o requirements/dev.txt
-```
-
 ## Environment Variables
 
-Required in production:
-
-- `SECRET_KEY`
-- `ALLOWED_HOSTS`
-
-Database configuration:
-
-- `DATABASE_URL`
-
-Other useful variables:
-
-- `DJANGO_ENV` (development/production/test)
-- `CORS_ALLOWED_ORIGINS`
-- `REDIS_URL` (if you enable Redis-backed caching)
-
-Example:
-
-```bash
-export DATABASE_URL='postgresql://user:password@host/dbname?sslmode=require'
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SECRET_KEY` | Production | Django secret key |
+| `ALLOWED_HOSTS` | Production | Comma-separated hosts |
+| `DATABASE_URL` | Always | PostgreSQL connection string |
+| `DJANGO_ENV` | Optional | development / production / test |
+| `CORS_ALLOWED_ORIGINS` | Optional | CORS whitelist |
 
 ## Quality and Checks
 
-Ruff:
-
 ```bash
-ruff check apps config tests
-```
-
-mypy:
-
-```bash
-mypy
-```
-
-Django migration drift check:
-
-```bash
-python manage.py makemigrations --check --dry-run
-```
-
-Run tests (with coverage gate):
-
-```bash
-pytest --cov=apps --cov-report=term-missing --cov-fail-under=80
-```
-
-Security scan:
-
-```bash
-pip-audit --strict --desc
+ruff check apps config tests        # Linting
+mypy                                 # Type checking
+python manage.py makemigrations --check --dry-run   # Migration drift
+pytest                               # Tests + coverage (≥80%)
+pip-audit --strict --desc            # Security scan
 ```
 
 ## Pre-commit
 
-Install git hooks:
-
 ```bash
 pre-commit install
-```
-
-Run all hooks manually:
-
-```bash
 pre-commit run --all-files
 ```
 
 ## CI (GitHub Actions)
 
 `.github/workflows/ci.yml` runs:
-
 - Dependency install
 - ruff lint
 - mypy type check
 - Migration drift check
-- pytest + coverage (>= 80%)
+- pytest + coverage (≥ 80%)
 - pip-audit (`--strict`)
-- Docker build (as configured)
+- Docker build
 
 ## Deployment
 
-Production runs behind Gunicorn (see `Dockerfile` and deployment workflow).
-
-For production, define environment variables in your platform instead of relying on local `.env` files.
+Production runs behind Gunicorn. Define environment variables in your platform instead of local `.env` files.
