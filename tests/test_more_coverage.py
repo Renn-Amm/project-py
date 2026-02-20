@@ -156,8 +156,8 @@ class TestCoverageBoost:
         Organization.objects.create(name="Org")
         from django.contrib.auth import get_user_model
 
-        User = get_user_model()
-        User.objects.create_user(
+        user_model = get_user_model()
+        user_model.objects.create_user(
             email="dup@example.com",
             password="testpass123",
             first_name="",
