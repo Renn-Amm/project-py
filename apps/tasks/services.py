@@ -151,6 +151,8 @@ class TaskWorkflowService:
         """Cannot move a task in a closed sprint."""
         from apps.projects.models import Sprint
 
+        if task.sprint_id is None:
+            return
         try:
             sprint = Sprint.objects.get(pk=task.sprint_id)
         except Sprint.DoesNotExist:

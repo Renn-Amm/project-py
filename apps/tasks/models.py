@@ -11,7 +11,7 @@ class TaskPriority(models.TextChoices):
     CRITICAL = "critical", "Critical"
 
 
-PRIORITY_WEIGHTS = {
+PRIORITY_WEIGHTS: dict[str, int] = {
     TaskPriority.LOW: 1,
     TaskPriority.MEDIUM: 2,
     TaskPriority.HIGH: 3,
