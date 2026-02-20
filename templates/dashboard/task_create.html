@@ -25,20 +25,20 @@
         <div>
             <label class="block text-xs font-medium text-gray-600 dark:text-white/60 mb-1.5">Title</label>
             <input name="title" required
-                class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all" />
+                class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 focus:ring-2 focus:ring-brand/50 transition-all" />
         </div>
 
         <div>
             <label class="block text-xs font-medium text-gray-600 dark:text-white/60 mb-1.5">Description</label>
             <textarea name="description" rows="4"
-                class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all"></textarea>
+                class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 focus:ring-2 focus:ring-brand/50 transition-all"></textarea>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-xs font-medium text-gray-600 dark:text-white/60 mb-1.5">Priority</label>
                 <select name="priority"
-                    class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all">
+                    class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand/50 transition-all">
                     <option value="low">Low</option>
                     <option value="medium" selected>Medium</option>
                     <option value="high">High</option>
@@ -49,19 +49,19 @@
             <div>
                 <label class="block text-xs font-medium text-gray-600 dark:text-white/60 mb-1.5">Deadline</label>
                 <input type="datetime-local" name="deadline"
-                    class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all" />
+                    class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand/50 transition-all" />
             </div>
 
             <div>
                 <label class="block text-xs font-medium text-gray-600 dark:text-white/60 mb-1.5">Estimate (hours)</label>
                 <input name="estimated_time_hours" placeholder="e.g. 6"
-                    class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all" />
+                    class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 focus:ring-2 focus:ring-brand/50 transition-all" />
             </div>
 
             <div>
                 <label class="block text-xs font-medium text-gray-600 dark:text-white/60 mb-1.5">Assignee</label>
                 <select name="assignee"
-                    class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all">
+                    class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand/50 transition-all">
                     <option value="">Unassigned</option>
                     {% for m in memberships %}
                     <option value="{{ m.user.id }}">{{ m.user.email }}</option>
@@ -72,7 +72,7 @@
             <div>
                 <label class="block text-xs font-medium text-gray-600 dark:text-white/60 mb-1.5">Reviewer</label>
                 <select name="reviewer"
-                    class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all">
+                    class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand/50 transition-all">
                     <option value="">None</option>
                     {% for m in memberships %}
                     <option value="{{ m.user.id }}">{{ m.user.email }}</option>

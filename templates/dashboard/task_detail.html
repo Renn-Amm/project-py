@@ -83,7 +83,7 @@
                         class="flex flex-col sm:flex-row gap-3">
                         {% csrf_token %}
                         <select name="to_status"
-                            class="flex-1 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all">
+                            class="flex-1 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand/50 transition-all">
                             {% for key, label in statuses %}
                             <option value="{{ key }}">{{ label }}</option>
                             {% endfor %}
@@ -119,10 +119,10 @@
                         class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
                         {% csrf_token %}
                         <input name="hours" placeholder="Hours (e.g. 1.5)"
-                            class="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all"
+                            class="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 focus:ring-2 focus:ring-brand/50 transition-all"
                             required />
                         <input type="date" name="date"
-                            class="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand/50 transition-all"
+                            class="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/[.04] px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-brand/50 transition-all"
                             required />
                         <button
                             class="rounded-xl bg-brand/10 dark:bg-brand/15 text-brand dark:text-brand-light px-4 py-2.5 text-sm font-semibold hover:bg-brand/20 transition-all">Log

@@ -389,7 +389,12 @@ def task_detail_view(request, pk: int):
         pk=pk,
     )
 
-    time_entries = task.time_entries.select_related("user").order_by("-created_at")[:50]
+    time_entries = (
+        TimeEntry.objects
+        .filter(task=task)
+        .select_related("user")
+        .order_by("-created_at")
+    )[:50]
 
     return render(
         request,
