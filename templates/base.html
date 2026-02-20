@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ sidebarOpen: true, darkMode: localStorage.getItem('dm')==='1' }" :class="{ 'dark': darkMode }"
+<html lang="en"
+    x-data="{ sidebarOpen: window.innerWidth >= 1024, darkMode: localStorage.getItem('dm')==='1' }"
+    :class="{ 'dark': darkMode }"
     x-init="$watch('darkMode', v => localStorage.setItem('dm', v?'1':'0'))">
 
 <head>
@@ -143,12 +145,15 @@
 
     {% if user.is_authenticated %}
     <div class="flex min-h-screen">
+        <div class="fixed inset-0 z-20 bg-black/40 lg:hidden" x-show="sidebarOpen" x-cloak
+            @click="sidebarOpen = false"></div>
         {% include "partials/sidebar.html" %}
 
-        <div class="flex-1 flex flex-col min-w-0 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-16'">
+        <div class="flex-1 flex flex-col min-w-0 transition-all duration-300"
+            :class="sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'">
             {% include "partials/topbar.html" %}
 
-            <main class="flex-1 p-6 lg:p-8 overflow-auto">
+            <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
                 {% if messages %}
                 <div class="mb-6 space-y-2">
                     {% for message in messages %}

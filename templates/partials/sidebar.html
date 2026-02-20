@@ -1,6 +1,6 @@
 {% load static %}
 <aside class="fixed inset-y-0 left-0 z-30 bg-sidebar text-white flex flex-col transition-all duration-300"
-    :class="sidebarOpen ? 'w-64' : 'w-16'">
+    :class="sidebarOpen ? 'w-64 translate-x-0' : 'w-64 -translate-x-full lg:w-16 lg:translate-x-0'">
 
     <!-- Logo -->
     <div class="flex items-center h-16 px-4 border-b border-white/[.06] shrink-0">
@@ -21,7 +21,7 @@
             <span class="text-[10px] font-semibold uppercase tracking-wider text-white/30">Main</span>
         </div>
 
-        <a href="{% url 'dashboard_home' %}"
+        <a href="{% url 'dashboard_home' %}" @click="if (window.innerWidth < 1024) sidebarOpen = false"
             class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                   {% if request.resolver_match.url_name == 'dashboard_home' %}bg-brand/15 text-brand-light{% else %}text-white/60 hover:bg-white/[.06] hover:text-white{% endif %}">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -31,7 +31,7 @@
             <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Dashboard</span>
         </a>
 
-        <a href="{% url 'dashboard_projects' %}"
+        <a href="{% url 'dashboard_projects' %}" @click="if (window.innerWidth < 1024) sidebarOpen = false"
             class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                   {% if 'project' in request.resolver_match.url_name %}bg-brand/15 text-brand-light{% else %}text-white/60 hover:bg-white/[.06] hover:text-white{% endif %}">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -45,7 +45,7 @@
             <span class="text-[10px] font-semibold uppercase tracking-wider text-white/30">Insights</span>
         </div>
 
-        <a href="{% url 'dashboard_analytics' %}"
+        <a href="{% url 'dashboard_analytics' %}" @click="if (window.innerWidth < 1024) sidebarOpen = false"
             class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                   {% if request.resolver_match.url_name == 'dashboard_analytics' %}bg-brand/15 text-brand-light{% else %}text-white/60 hover:bg-white/[.06] hover:text-white{% endif %}">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -55,7 +55,7 @@
             <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Analytics</span>
         </a>
 
-        <a href="{% url 'dashboard_performance' %}"
+        <a href="{% url 'dashboard_performance' %}" @click="if (window.innerWidth < 1024) sidebarOpen = false"
             class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                   {% if request.resolver_match.url_name == 'dashboard_performance' %}bg-brand/15 text-brand-light{% else %}text-white/60 hover:bg-white/[.06] hover:text-white{% endif %}">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -64,7 +64,7 @@
             <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Performance</span>
         </a>
 
-        <a href="{% url 'dashboard_activity' %}"
+        <a href="{% url 'dashboard_activity' %}" @click="if (window.innerWidth < 1024) sidebarOpen = false"
             class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                   {% if request.resolver_match.url_name == 'dashboard_activity' %}bg-brand/15 text-brand-light{% else %}text-white/60 hover:bg-white/[.06] hover:text-white{% endif %}">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -77,7 +77,7 @@
             <span class="text-[10px] font-semibold uppercase tracking-wider text-white/30">Admin</span>
         </div>
 
-        <a href="{% url 'dashboard_invitations' %}"
+        <a href="{% url 'dashboard_invitations' %}" @click="if (window.innerWidth < 1024) sidebarOpen = false"
             class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                   {% if request.resolver_match.url_name == 'dashboard_invitations' %}bg-brand/15 text-brand-light{% else %}text-white/60 hover:bg-white/[.06] hover:text-white{% endif %}">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -87,7 +87,7 @@
             <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Invitations</span>
         </a>
 
-        <a href="{% url 'dashboard_notifications' %}"
+        <a href="{% url 'dashboard_notifications' %}" @click="if (window.innerWidth < 1024) sidebarOpen = false"
             class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                   {% if request.resolver_match.url_name == 'dashboard_notifications' %}bg-brand/15 text-brand-light{% else %}text-white/60 hover:bg-white/[.06] hover:text-white{% endif %}">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -97,7 +97,7 @@
             <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Notifications</span>
         </a>
 
-        <a href="{% url 'dashboard_audit' %}"
+        <a href="{% url 'dashboard_audit' %}" @click="if (window.innerWidth < 1024) sidebarOpen = false"
             class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                   {% if request.resolver_match.url_name == 'dashboard_audit' %}bg-brand/15 text-brand-light{% else %}text-white/60 hover:bg-white/[.06] hover:text-white{% endif %}">
             <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -110,13 +110,15 @@
 
     <!-- Collapse -->
     <div class="border-t border-white/[.06] p-3 shrink-0">
-        <button @click="sidebarOpen = !sidebarOpen"
-            class="flex items-center w-full px-3 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[.06] transition-all text-sm">
+        <button @click="sidebarOpen = !sidebarOpen" class="lg:flex hidden items-center w-full px-3 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[.06] transition-all text-sm">
             <svg class="w-5 h-5 shrink-0 transition-transform duration-300" :class="sidebarOpen ? '' : 'rotate-180'"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
             <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Collapse</span>
+        </button>
+        <button @click="sidebarOpen = false" class="flex lg:hidden items-center w-full px-3 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[.06] transition-all text-sm">
+            <span class="ml-3 whitespace-nowrap" x-show="sidebarOpen" x-cloak>Close</span>
         </button>
     </div>
 </aside>
