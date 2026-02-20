@@ -301,13 +301,28 @@ def project_remove_member_view(request, pk: int, member_id: int):
     return redirect("dashboard_project_detail", pk=pk)
 
 
-@require_POST
 @login_required
 def task_create_view(request, project_pk: int):
     project = get_object_or_404(
         Project.objects.filter(organization=_org(request), memberships__user=request.user).distinct(),
         pk=project_pk,
     )
+
+    if request.method != "POST":
+        memberships = (
+            ProjectMember.objects
+            .filter(project=project)
+            .select_related("user")
+            .order_by("user__email")
+        )
+        return render(
+            request,
+            "dashboard/task_create.html",
+            {
+                "project": project,
+                "memberships": memberships,
+            },
+        )
 
     title = (request.POST.get("title") or "").strip()
     if not title:
