@@ -1,181 +1,227 @@
 # Task Manager
 
-A production-grade, organization-isolated Task Management system built with Django and Django REST Framework.
+Task Manager is a Django web application for organization-scoped project and task management, including dashboards, workflow transitions, time tracking, and audit logging.
 
-## Architecture
+## Features
 
-```
-project/
-├── config/                    # Django configuration
-│   ├── settings/
-│   │   ├── __init__.py        # Environment-based settings selector
-│   │   ├── base.py            # Shared settings
-│   │   ├── development.py     # Dev overrides (DEBUG=True)
-│   │   ├── production.py      # Production hardening (SSL, HSTS, etc.)
-│   │   └── test.py            # Test overrides (fast hashing, no throttle)
-│   ├── urls.py
-│   └── wsgi.py
-├── apps/
-│   ├── accounts/              # User model, JWT auth, RBAC
-│   ├── organizations/         # Organization model
-│   ├── projects/              # Projects + membership
-│   ├── tasks/                 # Tasks + workflow state machine
-│   ├── time_tracking/         # Time entries (restricted edits)
-│   ├── audit/                 # Audit logging, middleware
-│   ├── performance/           # Performance app placeholder
-│   ├── core/                  # Health check, exception handler
-│   └── dashboard/             # Server-rendered dashboard (Django templates)
-├── tests/                     # Comprehensive test suite
-├── templates/                 # Dashboard HTML templates
-├── .github/workflows/ci.yml   # CI pipeline
-├── Dockerfile                 # Multi-stage production build
-├── docker-compose.yml         # Local development
-└── requirements.txt           # Pinned dependencies
-```
+Authentication:
+
+- Sign up, sign in, sign out (JWT + dashboard login)
+
+Organization-scoped project management:
+
+- Projects
+- Membership enforcement
+
+Task management:
+
+- Kanban-style statuses and backend-enforced workflow transitions
+- Review-gated completion rules
+- Overdue detection via management command
+
+Time tracking:
+
+- Time entries per task
+- Restricted edits (immutability window)
+
+Audit logging:
+
+- Middleware-driven mutation logging for key API actions
+- Organization-scoped audit trail
+
+Dashboard:
+
+- Entity counts
+- Performance metrics pages
+- Audit log view
 
 ## Tech Stack
 
-| Component       | Technology                          |
-|-----------------|-------------------------------------|
-| Language        | Python 3.11+                        |
-| Framework       | Django 4.2, Django REST Framework   |
-| Database        | PostgreSQL 15                       |
-| Authentication  | JWT (SimpleJWT) with token blacklist|
-| Testing         | pytest, pytest-django, pytest-cov   |
-| Linting         | ruff                                |
-| Security Scan   | pip-audit                           |
-| CI              | GitHub Actions                      |
-| Container       | Docker (multi-stage build)          |
+- Python + Django 4.2 LTS
+- Django REST Framework
+- Server-rendered templates for the dashboard
+- Gunicorn (production)
+- PostgreSQL via `DATABASE_URL`
+- Docker + docker-compose for local development
+- Quality tooling: ruff + mypy + pre-commit
+- CI: GitHub Actions (lint, typecheck, migrations check, tests, coverage, pip-audit)
 
-## Key Features
+## Project Structure
 
-- **Organization isolation** — All reads/writes are scoped to `user.organization`
-- **Project membership enforcement** — Only members can view/change a project
-- **Workflow state machine** — Backend-enforced transitions + role restrictions
-- **Review-gated completion** — Cannot complete a task without reviewer approval
-- **Overdue detection** — Scheduled management command marks overdue tasks
-- **Time tracking** — Log time per task; restricted editing rules
-- **Audit logging** — Tracks status changes and important mutations
-- **Analytics** — Dashboard metrics for throughput/time
-- **Role-based access control** — Owner > Project Manager > Developer > Viewer
+```
+.
+├── config/
+│   ├── settings/
+│   │   ├── base.py
+│   │   ├── development.py
+│   │   ├── production.py
+│   │   └── test.py
+│   ├── urls.py
+│   └── wsgi.py
+├── apps/
+│   ├── accounts/
+│   ├── organizations/
+│   ├── projects/
+│   ├── tasks/
+│   ├── time_tracking/
+│   ├── audit/
+│   ├── core/
+│   └── dashboard/
+├── templates/
+├── tests/
+├── requirements/
+│   ├── prod.in
+│   ├── prod.txt
+│   ├── dev.in
+│   └── dev.txt
+└── .github/
+    └── workflows/
+        ├── ci.yml
+        └── cd.yml
+```
 
-## Quick Start
+## Local Setup
+
+Create and activate a virtual environment.
+
+Install dependencies.
+
+Run migrations.
+
+Start the server.
 
 ```bash
-# Clone and start
-docker-compose up -d
+python -m venv .venv
+. .venv/Scripts/activate
 
-# Run migrations
-docker-compose exec web python manage.py migrate
+pip install -r requirements/dev.txt
 
-# Create superuser
-docker-compose exec web python manage.py createsuperuser
+python manage.py migrate
+python manage.py runserver
+```
 
-# Run tests
-docker-compose exec web pytest
+## Dependency Management
+
+Install pip-tools once in your active virtualenv:
+
+```bash
+pip install pip-tools
+```
+
+Direct dependencies live in:
+
+- `requirements/prod.in`
+- `requirements/dev.in`
+
+Lock files consumed by CI/local installs:
+
+- `requirements/prod.txt`
+- `requirements/dev.txt`
+
+Regenerate lock files without upgrading versions:
+
+```bash
+pip-compile requirements/prod.in --generate-hashes -o requirements/prod.txt
+pip-compile requirements/dev.in --generate-hashes -o requirements/dev.txt
+```
+
+Upgrade all dependencies and refresh lock files:
+
+```bash
+pip-compile --upgrade requirements/prod.in --generate-hashes -o requirements/prod.txt
+pip-compile --upgrade requirements/dev.in --generate-hashes -o requirements/dev.txt
+```
+
+Upgrade a single dependency and refresh lock files:
+
+```bash
+pip-compile --upgrade-package Django requirements/prod.in --generate-hashes -o requirements/prod.txt
+pip-compile --upgrade-package Django requirements/dev.in --generate-hashes -o requirements/dev.txt
 ```
 
 ## Environment Variables
 
-| Variable              | Required | Default                  | Description                    |
-|-----------------------|----------|--------------------------|--------------------------------|
-| `SECRET_KEY`          | Yes (prod) | dev key                | Django secret key              |
-| `DJANGO_ENV`          | No       | development              | development / production / test|
-| `DATABASE_URL`        | No       | postgres://...localhost  | PostgreSQL connection string   |
-| `ALLOWED_HOSTS`       | Yes (prod) | *                      | Comma-separated hostnames      |
-| `CORS_ALLOWED_ORIGINS`| Yes (prod) |                        | Comma-separated origins        |
-| `REDIS_URL`           | No       | redis://localhost:6379/0 | Redis for caching (prod)       |
+Required in production:
 
-## API Endpoints
+- `SECRET_KEY`
+- `ALLOWED_HOSTS`
 
-### Authentication
-| Method | Endpoint                  | Description          |
-|--------|---------------------------|----------------------|
-| POST   | `/api/auth/register/`     | Register new user    |
-| POST   | `/api/auth/login/`        | Obtain JWT tokens    |
-| POST   | `/api/auth/refresh/`      | Refresh access token |
-| POST   | `/api/auth/logout/`       | Blacklist refresh token |
-| GET    | `/api/auth/profile/`      | Get current user     |
-| POST   | `/api/auth/change-password/` | Change password   |
+Database configuration:
 
-### Projects
-| Method | Endpoint                     | Description           |
-|--------|------------------------------|-----------------------|
-| GET    | `/api/projects/`             | List projects         |
-| POST   | `/api/projects/`             | Create project        |
-| GET    | `/api/projects/<id>/`        | Project detail        |
-| PATCH  | `/api/projects/<id>/`        | Update project        |
+- `DATABASE_URL`
 
-### Tasks
-| Method | Endpoint                                   | Description                 |
-|--------|--------------------------------------------|-----------------------------|
-| GET    | `/api/tasks/`                               | List tasks (filters)        |
-| POST   | `/api/projects/<project_id>/tasks/`         | Create task                 |
-| GET    | `/api/tasks/<id>/`                          | Task detail                 |
-| POST   | `/api/tasks/<id>/transition/`               | Workflow transition         |
-| POST   | `/api/tasks/<id>/time-entries/`             | Log time for task           |
+Other useful variables:
 
-### Audit
-| Method | Endpoint                | Description     |
-|--------|-------------------------|-----------------|
-| GET    | `/api/audit/logs/`      | List audit logs |
+- `DJANGO_ENV` (development/production/test)
+- `CORS_ALLOWED_ORIGINS`
+- `REDIS_URL` (if you enable Redis-backed caching)
 
-### Health
-| Method | Endpoint          | Description       |
-|--------|-------------------|--------------------|
-| GET    | `/api/health/`    | Health check       |
-
-## Ruleset Protection Strategy
-
-All business rules enforced at **three layers**:
-
-1. **Model validation** (`clean()` + `save()` override) — Prevents invalid state at ORM level
-2. **Service layer** — Business logic with `@transaction.atomic` and `select_for_update()`
-3. **Database constraints** — `unique_together`, foreign keys, check constraints
-
-### Critical Rules Enforced
-
-| Rule                                          | Enforcement Layer        |
-|-----------------------------------------------|--------------------------|
-| Organization isolation on all queries         | View/service scoping     |
-| Role-restricted task transitions              | Service layer            |
-| Cannot complete without review approval       | Service layer            |
-| Overdue detection not removable manually      | Model/service + cron cmd |
-| Time entry edit restrictions                  | Service layer            |
-
-## Backup & Recovery Strategy
-
-### Database Backups
-- **Frequency:** Daily full backup + continuous WAL archiving
-- **Retention:** 30 days of daily backups, 7 days of WAL
-- **Method:** `pg_dump` for logical backups, WAL-G for continuous archiving
-- **Storage:** Encrypted S3 bucket in separate region
-
-### Restore Testing
-- Monthly restore drill to staging environment
-- Automated restore verification in CI (quarterly)
-
-### Disaster Recovery
-- **RPO (Recovery Point Objective):** < 5 minutes (WAL archiving)
-- **RTO (Recovery Time Objective):** < 30 minutes
-- **Procedure:** Restore from latest WAL archive → verify data integrity → switch DNS
-
-## Running Tests
+Example:
 
 ```bash
-# Full test suite with coverage
-DJANGO_ENV=test pytest
-
-# Specific test file
-DJANGO_ENV=test pytest tests/test_overdue_job.py
+export DATABASE_URL='postgresql://user:password@host/dbname?sslmode=require'
 ```
 
-## CI Pipeline
+## Quality and Checks
 
-GitHub Actions runs on every push to `main`/`develop` and all PRs:
+Ruff:
 
-1. **Lint** — `ruff check`
-2. **Test** — `pytest` with PostgreSQL service container
-3. **Coverage** — Fails if below 80%
-4. **Security** — `pip-audit --strict` for dependency vulnerabilities
-5. **Docker** — Build and verify image (main branch only)
+```bash
+ruff check apps config tests
+```
+
+mypy:
+
+```bash
+mypy
+```
+
+Django migration drift check:
+
+```bash
+python manage.py makemigrations --check --dry-run
+```
+
+Run tests (with coverage gate):
+
+```bash
+pytest --cov=apps --cov-report=term-missing --cov-fail-under=80
+```
+
+Security scan:
+
+```bash
+pip-audit --strict --desc
+```
+
+## Pre-commit
+
+Install git hooks:
+
+```bash
+pre-commit install
+```
+
+Run all hooks manually:
+
+```bash
+pre-commit run --all-files
+```
+
+## CI (GitHub Actions)
+
+`.github/workflows/ci.yml` runs:
+
+- Dependency install
+- ruff lint
+- mypy type check
+- Migration drift check
+- pytest + coverage (>= 80%)
+- pip-audit (`--strict`)
+- Docker build (as configured)
+
+## Deployment
+
+Production runs behind Gunicorn (see `Dockerfile` and deployment workflow).
+
+For production, define environment variables in your platform instead of relying on local `.env` files.
